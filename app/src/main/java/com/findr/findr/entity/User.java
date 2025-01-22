@@ -7,8 +7,17 @@ public class User {
     private Long id;
     private String username;
     private String password;
-    private Point location;
+    private int age;
+    private String email;
+    private Point location = new Point(0,0);
+    private String name;
 
+    public User(String username, String password, Point location, int age){
+        this.password = password;
+        this.username = username;
+        this.location = location;
+        this.age = age;
+    }
     public Long getId() {
         return id;
     }
@@ -46,7 +55,33 @@ public class User {
         return "Name: " + username +
                 "\nID: " + id +
                 "\nPassword: " + password +
-                "\nLocation: " + location.toString();
+                "Age: " + age +
+                "Email: " + email +
+                "Name: " + name +
+                "\nLocation: " + (location != null ? location : "null");
+    }
 
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

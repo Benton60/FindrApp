@@ -8,6 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ReportFragment.Companion.reportFragment
 import ApiService
+import android.graphics.Point
 import com.findr.findr.api.RetrofitClient
 import com.findr.findr.entity.User
 import kotlinx.coroutines.CoroutineScope
@@ -17,6 +18,9 @@ import kotlinx.coroutines.withContext
 import retrofit2.await
 
 class MainActivity : AppCompatActivity() {
+
+    val username = "guest"
+    val password = "guest"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -30,11 +34,12 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             //testing the retrofit api call
-            val retrofitClient = RetrofitClient.getInstance().create(ApiService::class.java)
-            val user = retrofitClient.getUser("user")
+            val retrofitClient = RetrofitClient.getInstance(username, password).create(ApiService::class.java)
+            val user = retrofitClient.getUser("guest")
             CoroutineScope(Dispatchers.Main).launch {
                 txtView.text = user.toString()
             }
+            //retrofitClient.createUser(User("guest", "guest",Point(), 13))
         }
     }
 }
