@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.content.Intent
+import android.graphics.Point
 import android.util.Log
 import androidx.fragment.app.Fragment
 import com.findr.findr.api.RetrofitClient
@@ -39,9 +40,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         atStart()
-
     }
 
     override fun onResume() {
@@ -55,7 +54,6 @@ class MainActivity : AppCompatActivity() {
     }
     //this function checks whether there is a validation saved in the apps data
     fun loadCredentials(){
-
         try {
             val fileInputStream = BufferedReader(InputStreamReader(openFileInput("Authentication.txt")))
             retrofitClient = RetrofitClient.getInstance(fileInputStream.readLine(),fileInputStream.readLine()).create(ApiService::class.java)

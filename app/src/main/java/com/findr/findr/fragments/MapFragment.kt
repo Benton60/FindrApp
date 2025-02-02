@@ -2,6 +2,7 @@ package com.findr.findr
 
 import ApiService
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,12 +49,14 @@ class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapRea
 
             val friends = retrofitClient.getFriends(RetrofitClient.getCurrentUsername())
             for(friend in friends){
+                Log.v("Friend", "Friend: " + friend.username + ", Location: " + friend.location)
                 CoroutineScope(Dispatchers.Main).launch {
                     mMap.addMarker(
                         MarkerOptions().position(
                             LatLng(
-                                friend.location.x.toDouble(),
-                                friend.location.y.toDouble()
+                                //this division is because my api is being retarded and won't let me store doubles
+                                friend.location.x/100000.0,
+                                friend.location.y/-100000.0
                             )
                         ).title(friend.username)
                     )
