@@ -3,6 +3,8 @@ package com.findr.findr.entity;
 
 import android.graphics.Point;
 
+import java.util.List;
+
 public class User {
     private Long id;
     private String username;
@@ -11,7 +13,12 @@ public class User {
     private String email;
     private Point location = new Point(0,0);
     private String name;
+    private List friendsUsernames;
 
+    public User(String username, String password){
+        this.username = username;
+        this.password = password;
+    }
     public User(String username, String password, Point location, int age){
         this.password = password;
         this.username = username;
@@ -83,5 +90,13 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List getFriendsUsernames() {
+        return friendsUsernames;
+    }
+
+    public void setFriendsUsernames(List friendsUsernames) {
+        this.friendsUsernames = friendsUsernames;
     }
 }
