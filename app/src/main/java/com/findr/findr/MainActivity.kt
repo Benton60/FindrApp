@@ -16,6 +16,7 @@ import com.findr.findr.entity.User
 import com.findr.findr.fragments.CameraFragment
 import com.findr.findr.fragments.HomeFragment
 import com.findr.findr.fragments.VideoFragment
+import com.google.android.gms.maps.MapFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,8 +28,8 @@ import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
 
-    var username = ""
-    var password = ""
+    lateinit var retrofitClient: ApiService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -41,10 +42,6 @@ class MainActivity : AppCompatActivity() {
 
         atStart()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val retroFitClient = RetrofitClient.getInstance("guest", "guest").create(ApiService::class.java)
-            retroFitClient.addFriend(1,  2)
-        }
     }
 
     override fun onResume() {
@@ -53,15 +50,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun atStart(){
-        //loadCredentials()
+        loadCredentials()
         onClickForNavBar()
     }
     //this function checks whether there is a validation saved in the apps data
     fun loadCredentials(){
+
         try {
             val fileInputStream = BufferedReader(InputStreamReader(openFileInput("Authentication.txt")))
-            username = fileInputStream.readLine()
-            password = fileInputStream.readLine()
+            retrofitClient = RetrofitClient.getInstance(fileInputStream.readLine(),fileInputStream.readLine()).create(ApiService::class.java)
         }catch(e: Exception){
             Log.e("Reading Credentials", e.toString())
             val intent = Intent(this, LoginActivity::class.java)
@@ -87,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.map -> {
                     // Handle Map click
-                    replaceFragment(MapFragment())
+                    replaceFragment(MapFragment(retrofitClient))
                     true
                 }
                 R.id.videos -> {

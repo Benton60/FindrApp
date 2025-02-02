@@ -24,7 +24,7 @@
             android:value="AIzaSyC1Ma8ZLlOWRLPGkXwBx6tto3JzhXrCz2M" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".MapFragment"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

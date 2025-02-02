@@ -1,5 +1,7 @@
 package com.findr.findr.api;
 
+import com.findr.findr.entity.User;
+
 import java.io.IOException;
 
 import okhttp3.Credentials;
@@ -47,5 +49,8 @@ public class RetrofitClient {
                     .build();
         }
         return retrofit;
+    }
+    public static String getCurrentUsername(){
+        return currentUsername;
     }
 }

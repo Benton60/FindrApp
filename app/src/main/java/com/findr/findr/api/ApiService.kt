@@ -17,7 +17,12 @@ interface ApiService {
     @GET("posts/byAuthor/{author}")
     suspend fun getPosts(@Path("author") author: String): List<Post>
 
+
     //Friends
+    @GET("friendships/friends/{username}")
+    suspend fun getFriends(@Path("username") username: String): List<User>
     @POST("friendships/addFriend/{follower}/{followee}")
     suspend fun addFriend(@Path("follower") follower: Long, @Path("followee") followee: Long)
+
+
 }
