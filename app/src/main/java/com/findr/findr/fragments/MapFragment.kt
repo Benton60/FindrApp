@@ -31,6 +31,8 @@ class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapRea
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
 
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

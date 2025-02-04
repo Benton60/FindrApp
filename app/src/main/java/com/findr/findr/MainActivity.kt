@@ -39,13 +39,13 @@ class MainActivity : AppCompatActivity() {
         atStart()
     }
 
-    private fun atStart(){
+    private fun atStart() {
         loadCredentials()
-        replaceFragment(HomeFragment())
+        replaceFragment(HomeFragment(retrofitClient))
         onClickForNavBar()
     }
     //this function checks whether there is a validation saved in the apps data
-    private fun loadCredentials(){
+    private fun loadCredentials() {
         try {
             val fileInputStream = BufferedReader(InputStreamReader(openFileInput("Authentication.txt")))
             retrofitClient = RetrofitClient.getInstance(fileInputStream.readLine(),fileInputStream.readLine()).create(ApiService::class.java)
@@ -56,15 +56,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun onClickForNavBar(){
+    private fun onClickForNavBar() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.home -> {
                     // Handle Home click
-                    replaceFragment(HomeFragment())
+                    replaceFragment(HomeFragment(retrofitClient))
                     true
                 }
                 R.id.camera -> {
@@ -86,6 +85,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun replaceFragment(fragment: Fragment) {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.fragmentContainer, fragment)

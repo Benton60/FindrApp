@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
         android:allowBackup="true"
@@ -28,9 +30,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyC1Ma8ZLlOWRLPGkXwBx6tto3JzhXrCz2M" />
 
-        <activity
-            android:name=".MapFragment"
-            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

@@ -10,6 +10,13 @@ public class Post {
     private Point location;
     private Long likes;
 
+    public Post(String description, String author, Point location) {
+        this.id = id;
+        this.description = description;
+        this.author = author;
+        this.location = location;
+    }
+
     public Long getId() {
         return id;
     }
