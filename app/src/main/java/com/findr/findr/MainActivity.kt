@@ -1,35 +1,26 @@
 package com.findr.findr
 
-import ApiService
-import android.content.ClipData
 import android.os.Bundle
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.content.Intent
-import android.graphics.Point
 import android.util.Log
 import androidx.fragment.app.Fragment
+import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
-import com.findr.findr.entity.User
 import com.findr.findr.fragments.CameraFragment
 import com.findr.findr.fragments.HomeFragment
+import com.findr.findr.fragments.MapFragment
 import com.findr.findr.fragments.VideoFragment
-import com.google.android.gms.maps.MapFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.BufferedInputStream
 import java.io.BufferedReader
-import java.io.FileInputStream
 import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var retrofitClient: ApiService
+    private lateinit var retrofitClient: ApiService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,12 +39,13 @@ class MainActivity : AppCompatActivity() {
         atStart()
     }
 
-    fun atStart(){
+    private fun atStart(){
         loadCredentials()
+        replaceFragment(HomeFragment())
         onClickForNavBar()
     }
     //this function checks whether there is a validation saved in the apps data
-    fun loadCredentials(){
+    private fun loadCredentials(){
         try {
             val fileInputStream = BufferedReader(InputStreamReader(openFileInput("Authentication.txt")))
             retrofitClient = RetrofitClient.getInstance(fileInputStream.readLine(),fileInputStream.readLine()).create(ApiService::class.java)
@@ -65,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun onClickForNavBar(){
+    private fun onClickForNavBar(){
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
         bottomNavigationView.setOnItemSelectedListener { item ->

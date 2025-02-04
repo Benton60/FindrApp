@@ -1,6 +1,6 @@
 package com.findr.findr
 
-import ApiService
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -8,12 +8,15 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
+import com.google.android.material.textview.MaterialTextView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 
+//TODO -- add in the forgot password functionality
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +27,9 @@ class LoginActivity : AppCompatActivity() {
         val edtUsername = findViewById<EditText>(R.id.username_input)
         val edtPassword = findViewById<EditText>(R.id.password_input)
 
+        findViewById<MaterialTextView>(R.id.sign_up_link).setOnClickListener{
+            startActivity(Intent(this@LoginActivity, CreateAccountActivity::class.java))
+        }
 
         btnLogin.setOnClickListener{
             CoroutineScope(Dispatchers.IO).launch{
@@ -31,10 +37,11 @@ class LoginActivity : AppCompatActivity() {
                     var retrofitClient = RetrofitClient.getInstance(edtUsername.text.toString(),
                         edtPassword.text.toString()
                     ).create(ApiService::class.java)
-                    retrofitClient.getUser(edtUsername.text.toString())
+                    retrofitClient.getUserByUsername(edtUsername.text.toString())
                     try {
                         openFileOutput("Authentication.txt", MODE_PRIVATE).use { fos ->
                             fos.write((edtUsername.text.toString() + "\n" + edtPassword.text.toString()).toByteArray())
+                            fos.close()
                         }
                     } catch (e: IOException) {
                         e.printStackTrace()

@@ -1,3 +1,4 @@
+package com.findr.findr.api
 import com.findr.findr.entity.Post
 import com.findr.findr.entity.User
 import retrofit2.http.Body
@@ -8,19 +9,21 @@ import retrofit2.http.Path
 interface ApiService {
 
     //Users
-    @POST("users")
+    @POST("users/createUser")
     suspend fun createUser(@Body user: User)
-    @GET("users/{username}")
-    suspend fun getUser(@Path("username") username: String): User
+    @GET("users/byUsername/{username}")
+    suspend fun getUserByUsername(@Path("username") username: String): User
+    @GET("users/byID/{id}")
+    suspend fun getUserByID(@Path("id") id: Long): User
 
     //Posts
     @GET("posts/byAuthor/{author}")
-    suspend fun getPosts(@Path("author") author: String): List<Post>
+    suspend fun getPostsByAuthor(@Path("author") author: String): List<Post>
 
 
     //Friends
     @GET("friendships/friends/{username}")
-    suspend fun getFriends(@Path("username") username: String): List<User>
+    suspend fun getFriendsByUsername(@Path("username") username: String): List<User>
     @POST("friendships/addFriend/{follower}/{followee}")
     suspend fun addFriend(@Path("follower") follower: Long, @Path("followee") followee: Long)
 

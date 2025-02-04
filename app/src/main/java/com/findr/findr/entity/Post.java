@@ -8,6 +8,7 @@ public class Post {
     private String author;
     private String photoPath;
     private Point location;
+    private Long likes;
 
     public Long getId() {
         return id;
@@ -57,5 +58,13 @@ public class Post {
                 ", photoPath='" + photoPath + '\'' +
                 ", location=" + (location != null ? location.toString() : "null") +
                 '}';
+    }
+
+    public Long getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Long likes) {
+        this.likes = likes;
     }
 }

@@ -13,11 +13,20 @@ public class User {
     private String email;
     private Point location = new Point(0,0);
     private String name;
-    private List friendsUsernames;
+    private String description;
 
     public User(String username, String password){
         this.username = username;
         this.password = password;
+    }
+    public User(String name, int age, String email, String username, String password, String description){
+        this.name = name;
+        this.age = age;
+        this.email = email;
+        this.username = username;
+        this.password = password;
+        this.description = description;
+
     }
     public User(String username, String password, Point location, int age){
         this.password = password;
@@ -92,11 +101,11 @@ public class User {
         this.name = name;
     }
 
-    public List getFriendsUsernames() {
-        return friendsUsernames;
+    public String getDescription() {
+        return description;
     }
 
-    public void setFriendsUsernames(List friendsUsernames) {
-        this.friendsUsernames = friendsUsernames;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
