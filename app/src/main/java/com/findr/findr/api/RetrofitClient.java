@@ -56,4 +56,17 @@ public class RetrofitClient {
     public static String getCurrentUsername(){
         return currentUsername;
     }
+    public static Retrofit getInstanceWithoutAuth() {
+            // Build the OkHttpClient with the Interceptor
+            OkHttpClient client = new OkHttpClient.Builder().build();
+
+            // Create the Retrofit instance
+            Retrofit retrofitwithoutAuth = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .client(client)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        return retrofitwithoutAuth;
+    }
+
 }

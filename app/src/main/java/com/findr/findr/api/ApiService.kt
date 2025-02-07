@@ -1,5 +1,6 @@
 package com.findr.findr.api
 import android.graphics.Point
+import com.findr.findr.entity.LocationData
 import com.findr.findr.entity.Post
 import com.findr.findr.entity.User
 import retrofit2.http.Body
@@ -11,6 +12,10 @@ import retrofit2.http.Query
 interface ApiService {
 
     //Users
+    @GET("users/checkCredentials")
+    suspend fun checkCredentials()
+    @POST("users/updateLocation")
+    suspend fun updateLocation(@Body location: LocationData)
     @POST("users/createUser")
     suspend fun createUser(@Body user: User)
     @GET("users/byUsername/{username}")

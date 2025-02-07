@@ -76,7 +76,7 @@ class CreateAccountActivity : AppCompatActivity() {
             val newUser = User(fullName, age, email, username, password, accountDescription)
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val apiWorker = RetrofitClient.getInstance("guest", "guest").create(ApiService::class.java)
+                    val apiWorker = RetrofitClient.getInstanceWithoutAuth().create(ApiService::class.java)
                     apiWorker.createUser(newUser)
                     finish()
                 } catch (e: Exception) {

@@ -37,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
                     var retrofitClient = RetrofitClient.getInstance(edtUsername.text.toString(),
                         edtPassword.text.toString()
                     ).create(ApiService::class.java)
-                    retrofitClient.getUserByUsername(edtUsername.text.toString())
+                    retrofitClient.checkCredentials()
                     try {
                         openFileOutput("Authentication.txt", MODE_PRIVATE).use { fos ->
                             fos.write((edtUsername.text.toString() + "\n" + edtPassword.text.toString()).toByteArray())

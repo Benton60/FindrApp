@@ -2,6 +2,7 @@ package com.findr.findr.entity;
 
 
 import android.graphics.Point;
+import android.location.Location;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class User {
     private String password;
     private int age;
     private String email;
-    private Point location = new Point(0,0);
+    private LocationData location = new LocationData(0,0);
     private String name;
     private String description;
 
@@ -28,7 +29,7 @@ public class User {
         this.description = description;
 
     }
-    public User(String username, String password, Point location, int age){
+    public User(String username, String password, LocationData location, int age){
         this.password = password;
         this.username = username;
         this.location = location;
@@ -58,11 +59,11 @@ public class User {
         this.password = password;
     }
 
-    public Point getLocation() {
+    public LocationData getLocation() {
         return location;
     }
 
-    public void setLocation(Point location) {
+    public void setLocation(LocationData location) {
         this.location = location;
     }
 

@@ -54,9 +54,8 @@ class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapRea
                     mMap.addMarker(
                         MarkerOptions().position(
                             LatLng(
-                                //this division is because my api is being retarded and won't let me store doubles
-                                friend.location.x/100000.0,
-                                friend.location.y/-100000.0
+                                friend.location.longitude,
+                                friend.location.latitude,
                             )
                         ).title(friend.username)
                     )
