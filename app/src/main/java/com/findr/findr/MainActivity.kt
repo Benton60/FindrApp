@@ -1,16 +1,21 @@
 package com.findr.findr
 
+import android.Manifest
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
-import com.findr.findr.fragments.CameraFragment
 import com.findr.findr.fragments.HomeFragment
 import com.findr.findr.fragments.MapFragment
 import com.findr.findr.fragments.VideoFragment
@@ -32,6 +37,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         atStart()
+        findViewById<TextView>(R.id.profileLink).setOnClickListener{
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
     }
 
     override fun onResume() {
@@ -40,8 +48,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun atStart() {
+        if(!hasPermissions()){
+            requestPermissions()
+        }
         loadCredentials()
-        replaceFragment(HomeFragment(retrofitClient))
         onClickForNavBar()
     }
     //this function checks whether there is a validation saved in the apps data
@@ -50,6 +60,7 @@ class MainActivity : AppCompatActivity() {
             val fileInputStream = BufferedReader(InputStreamReader(openFileInput("Authentication.txt")))
             retrofitClient = RetrofitClient.getInstance(fileInputStream.readLine(),fileInputStream.readLine()).create(ApiService::class.java)
         }catch(e: Exception){
+            Log.d("File Not Found", "File not found")
             Log.e("Reading Credentials", e.toString())
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
@@ -91,5 +102,30 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.replace(R.id.fragmentContainer, fragment)
         fragmentTransaction.addToBackStack(null) // Optional: Add to back stack for navigation
         fragmentTransaction.commit()
+    }
+
+    private val requiredPermissions = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
+
+    private val requestPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allGranted = permissions.all { it.value }
+            if(!allGranted){
+                finish()
+            }else{
+                replaceFragment(HomeFragment(retrofitClient))
+            }
+        }
+
+    fun hasPermissions(): Boolean {
+        return requiredPermissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    fun requestPermissions() {
+        requestPermissionsLauncher.launch(requiredPermissions)
     }
 }

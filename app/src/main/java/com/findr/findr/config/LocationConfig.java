@@ -8,6 +8,7 @@ import android.location.Location;
 
 import androidx.core.content.ContextCompat;
 
+import com.findr.findr.entity.LocationData;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
@@ -32,7 +33,7 @@ public class LocationConfig {
      * @throws SecurityException if permission is missing.
      * @throws Exception if location retrieval fails.
      */
-    public Point getRoughLocation() throws Exception {
+    public LocationData getRoughLocation() throws Exception {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Permission ACCESS_COARSE_LOCATION is required.");
@@ -47,7 +48,7 @@ public class LocationConfig {
      * @throws SecurityException if permission is missing.
      * @throws Exception if location retrieval fails.
      */
-    public Point getPreciseLocation() throws Exception {
+    public LocationData getPreciseLocation() throws Exception {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Permission ACCESS_FINE_LOCATION is required.");
@@ -57,13 +58,13 @@ public class LocationConfig {
     }
 
     // Retrieves location synchronously
-    private Point getLocation() throws Exception {
+    private LocationData getLocation() throws Exception {
         @SuppressLint("MissingPermission")
         Task<Location> locationTask = fusedLocationClient.getLastLocation();
         Location location = Tasks.await(locationTask, 5, TimeUnit.SECONDS);
 
         if (location != null) {
-            return new Point((int) location.getLatitude()*multiplier, (int) location.getLongitude()*multiplier);
+            return new LocationData(location.getLongitude(), location.getLatitude());
         } else {
             throw new Exception("Unable to retrieve location");
         }

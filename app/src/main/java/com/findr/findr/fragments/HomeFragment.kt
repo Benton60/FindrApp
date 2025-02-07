@@ -18,9 +18,6 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         CoroutineScope(Dispatchers.IO).launch {
-            retrofitClient.createPost(Post("Test post", RetrofitClient.getCurrentUsername(), LocationConfig(requireContext()).preciseLocation))
-        }
-        CoroutineScope(Dispatchers.IO).launch {
             try {
                 getPosts()
             }catch(e: SecurityException){
@@ -33,7 +30,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
     private suspend fun getPosts(){
         val loc = LocationConfig(this.context).roughLocation;
-        val p = retrofitClient.getPostsByLocation(Integer(loc.x), Integer(loc.y))
+        val p = retrofitClient.getPostsByLocation(loc.longitude, loc.latitude)
         Log.d("Location: ", p.toString())
     }
 }

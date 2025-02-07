@@ -13,7 +13,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "http://172.20.16.1:8080/api/";
+    private static final String BASE_URL = "http://192.168.1.153:8080/api/";
     private static Retrofit retrofit;
     private static String currentUsername;
     private static String currentPassword;
@@ -48,6 +48,9 @@ public class RetrofitClient {
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
+        return retrofit;
+    }
+    public static Retrofit getInstanceWithoutNewAuth(){
         return retrofit;
     }
     public static String getCurrentUsername(){

@@ -1,17 +1,17 @@
 package com.findr.findr.entity;
 
 import android.graphics.Point;
+import android.location.Location;
 
 public class Post {
     private Long id;
     private String description;
     private String author;
     private String photoPath;
-    private Point location;
+    private LocationData location;
     private Long likes;
 
-    public Post(String description, String author, Point location) {
-        this.id = id;
+    public Post(String description, String author, LocationData location) {
         this.description = description;
         this.author = author;
         this.location = location;
@@ -49,22 +49,12 @@ public class Post {
         this.photoPath = photoPath;
     }
 
-    public Point getLocation() {
+    public LocationData getLocation() {
         return location;
     }
 
-    public void setLocation(Point location) {
+    public void setLocation(LocationData location) {
         this.location = location;
-    }
-    @Override
-    public String toString(){
-        return "EntityDetails {" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                ", author='" + author + '\'' +
-                ", photoPath='" + photoPath + '\'' +
-                ", location=" + (location != null ? location.toString() : "null") +
-                '}';
     }
 
     public Long getLikes() {
