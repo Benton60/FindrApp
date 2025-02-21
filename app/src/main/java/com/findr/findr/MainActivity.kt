@@ -9,7 +9,6 @@ import androidx.core.view.WindowInsetsCompat
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,7 +17,6 @@ import androidx.fragment.app.Fragment
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
 import com.findr.findr.config.LocationConfig
-import com.findr.findr.entity.LocationData
 import com.findr.findr.fragments.HomeFragment
 import com.findr.findr.fragments.MapFragment
 import com.findr.findr.fragments.VideoFragment
@@ -138,8 +136,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
-    private val requestPermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+    private val requestPermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val allGranted = permissions.all { it.value }
             if(!allGranted){
                 finish()

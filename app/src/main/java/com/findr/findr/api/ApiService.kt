@@ -6,6 +6,7 @@ import com.findr.findr.entity.User
 import okhttp3.MultipartBody
 import okhttp3.MultipartBody.*
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -48,4 +49,6 @@ interface ApiService {
     @POST("files/upload")
     fun uploadFile(@Part file: MultipartBody.Part): Call<String>
 
+    @GET("files/download/profile/{userFolder}/{filename}")
+    suspend fun downloadProfilePhoto(@Path("userFolder") userFolder: String, @Path("filename") filename: String): ResponseBody
 }

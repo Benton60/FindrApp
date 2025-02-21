@@ -1,10 +1,12 @@
 package com.findr.findr.fragments
+import android.graphics.BitmapFactory
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.HorizontalScrollView
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -20,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
 
 class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.fragment_home) {
 
@@ -44,21 +47,46 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
             val friendsContainer = view?.findViewById<LinearLayout>(R.id.friendsContainer)
             try {
                 val friends: List<User> = retrofitClient.getFriendsByUsername(RetrofitClient.getCurrentUsername())
-                CoroutineScope(Dispatchers.Main).launch {
-                    for (friend in friends) {
-                        val friendView = LayoutInflater.from(context).inflate(R.layout.item_friend, friendsContainer, false)
-                        Log.d("Friends", friends.size.toString())
-                        friendView.findViewById<TextView>(R.id.friendName).text = friend.username
 
-                        //changing the circle around the users color
-                        val strokeWidth = 3 * resources.displayMetrics.density //adjusts the 3 pixels to 3 dp
-                        val drawable = friendView.findViewById<View>(R.id.color_border).background as GradientDrawable
-                        drawable.setStroke(strokeWidth.toInt(), getColor(requireContext(), R.color.green))
+                for (friend in friends) {
+                    // Load the profile photo
+                    var profilePic: ResponseBody? = null
+                    try {
+                        profilePic = retrofitClient.downloadProfilePhoto(friend.username, "profile.png")
+                    } catch (e: Exception) {
+                        Log.e("ProfilePic", "Failed to download profile picture for ${friend.username}", e)
+                    }
+
+                    // Inflate friend item layout
+                    val friendView = LayoutInflater.from(context).inflate(R.layout.item_friend, friendsContainer, false)
+                    Log.d("Friends", friends.size.toString())
+
+                    friendView.findViewById<TextView>(R.id.friendName).text = friend.username
+
+                    // Change the circle around the user to green
+                    val strokeWidth = (3 * resources.displayMetrics.density).toInt() // Convert 3 pixels to 3dp
+                    val drawable = friendView.findViewById<View>(R.id.color_border).background as GradientDrawable
+                    drawable.setStroke(strokeWidth, getColor(requireContext(), R.color.green))
+
+                    val friendImageView = friendView.findViewById<ImageView>(R.id.friendImage)
+
+                    // Launch a coroutine for UI update
+                    CoroutineScope(Dispatchers.Main).launch {
+                        // If profile picture exists, decode and set it
+                        if (profilePic != null) {
+                            val bitmap = BitmapFactory.decodeStream(profilePic.byteStream())
+                            if (bitmap != null) {
+                                friendImageView.setImageBitmap(bitmap)
+                            } else {
+                                Log.e("ProfilePic", "Failed to decode bitmap for ${friend.username}")
+                            }
+                        } else {
+                            Log.w("ProfilePic", "No profile picture found for ${friend.username}, using default")
+                        }
 
                         friendsContainer?.addView(friendView)
                         Log.d("Friends", friend.username)
                     }
-
                 }
             } catch (e: Exception) {
                 //TODO -- make it jump to the no internet activity
