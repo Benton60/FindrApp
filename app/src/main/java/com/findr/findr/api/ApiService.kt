@@ -3,9 +3,15 @@ import android.graphics.Point
 import com.findr.findr.entity.LocationData
 import com.findr.findr.entity.Post
 import com.findr.findr.entity.User
+import okhttp3.MultipartBody
+import okhttp3.MultipartBody.*
+import okhttp3.RequestBody
+import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -37,5 +43,9 @@ interface ApiService {
     @POST("friendships/addFriend/{follower}/{followee}")
     suspend fun addFriend(@Path("follower") follower: Long, @Path("followee") followee: Long)
 
+    //Photos
+    @Multipart
+    @POST("files/upload")
+    fun uploadFile(@Part file: MultipartBody.Part): Call<String>
 
 }

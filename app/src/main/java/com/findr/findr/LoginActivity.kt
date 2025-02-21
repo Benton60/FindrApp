@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.net.SocketTimeoutException
 
 //TODO -- add in the forgot password functionality
 
@@ -47,6 +48,12 @@ class LoginActivity : AppCompatActivity() {
                         e.printStackTrace()
                     }
                     finish()
+                }catch(e: SocketTimeoutException){
+                    //TODO -- make this show a no internet activity
+                    Log.e("Can't verify", e.toString())
+                    CoroutineScope(Dispatchers.Main).launch{
+                        Toast.makeText(this@LoginActivity, "Incorrect Username or Password", Toast.LENGTH_SHORT).show()
+                    }
                 }catch (e:Exception){
                     Log.e("Can't verify", e.toString())
                     CoroutineScope(Dispatchers.Main).launch{

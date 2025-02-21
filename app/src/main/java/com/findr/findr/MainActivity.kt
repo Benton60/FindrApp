@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -25,8 +26,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.net.SocketTimeoutException
 
 class MainActivity : AppCompatActivity() {
 
@@ -58,13 +61,20 @@ class MainActivity : AppCompatActivity() {
         }
         loadCredentials()
         onClickForNavBar()
-        //updateUserLocation()
+        updateUserLocation()
     }
     //this function checks whether there is a validation saved in the app's data
     private fun loadCredentials() {
         try {
             val fileInputStream = BufferedReader(InputStreamReader(openFileInput("Authentication.txt")))
-            retrofitClient = RetrofitClient.getInstance(fileInputStream.readLine(),fileInputStream.readLine()).create(ApiService::class.java)
+            try {
+                retrofitClient = RetrofitClient.getInstance(
+                    fileInputStream.readLine(),
+                    fileInputStream.readLine()
+                ).create(ApiService::class.java)
+            }catch(e: SocketTimeoutException){
+                //TODO -- switch to a no internet connectivity activity
+            }
         }catch(e: Exception){
             Log.d("File Not Found", "File not found")
             Log.e("Reading Credentials", e.toString())
@@ -73,9 +83,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //TODO -- When i implement the no internet screen this function needs to switch to that screen instead of showing a toast.
     private fun updateUserLocation(){
         CoroutineScope(Dispatchers.IO).launch {
-            retrofitClient.updateLocation(LocationConfig(this@MainActivity).roughLocation)
+            try {
+                retrofitClient.updateLocation(LocationConfig(this@MainActivity).roughLocation)
+            }catch(e: Exception){
+                withContext(Dispatchers.Main){
+                    Toast.makeText(this@MainActivity, "Cannot Connect To The Server", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 

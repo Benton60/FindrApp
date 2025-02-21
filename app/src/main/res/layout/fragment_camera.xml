@@ -22,6 +22,16 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="80dp"
         android:text="Take Picture"/>
+
+    <Button
+        android:id="@+id/btnUpload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/btnCapture"
+        android:layout_marginTop="8dp"
+        android:text="Upload Picture"/>
+
 </RelativeLayout>
