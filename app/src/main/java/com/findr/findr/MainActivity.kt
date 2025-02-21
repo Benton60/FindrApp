@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
 import com.findr.findr.config.LocationConfig
+import com.findr.findr.fragments.CameraFragment
 import com.findr.findr.fragments.HomeFragment
 import com.findr.findr.fragments.MapFragment
 import com.findr.findr.fragments.VideoFragment

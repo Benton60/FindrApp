@@ -6,7 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-feature android:name="android.hardware.camera" android:required="true"/>
+    <uses-feature android:name="android.hardware.camera.any"/>
+
 
 
     <application
@@ -40,6 +41,10 @@
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
+
+        <meta-data
+            android:name="androidx.camera.defaultConfigProvider"
+            android:value="androidx.camera.core.impl.Camera2Config" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
