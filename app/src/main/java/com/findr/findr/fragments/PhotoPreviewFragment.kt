@@ -1,3 +1,5 @@
+package com.findr.findr.fragments
+
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
