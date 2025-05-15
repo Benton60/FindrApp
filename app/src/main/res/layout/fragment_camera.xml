@@ -15,5 +15,5 @@
         android:text="Capture"
         android:layout_gravity="bottom|center"
         android:padding="16dp"
-        android:backgroundTint="@android:color/holo_blue_light"/>
+        android:backgroundTint="@color/primary_blue"/>
 </FrameLayout>

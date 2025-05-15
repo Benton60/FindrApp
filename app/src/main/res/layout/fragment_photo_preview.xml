@@ -1,31 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/photoPreviewLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#000000"
     android:padding="16dp">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/photoImageView"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:scaleType="centerCrop"
-        android:background="@android:color/darker_gray"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scaleType="fitCenter"
+        android:contentDescription="Captured photo" />
 
     <EditText
         android:id="@+id/descriptionEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter description"
-        android:padding="8dp"
-        android:background="@android:color/white"/>
+        android:hint="Enter a description..."
+        android:background="@android:color/white"
+        android:textColor="#000000"
+        android:padding="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:maxLines="4"
+        android:gravity="top|start" />
 
-    <Button
-        android:id="@+id/saveButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Post"
-        android:backgroundTint="@android:color/holo_green_light"
-        android:padding="8dp"
-        android:layout_marginTop="16dp"/>
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/uploadButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Upload"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="@color/primary_blue"/>
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Save to Camera Roll"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="@color/primary_blue"/>
+    </LinearLayout>
 </LinearLayout>

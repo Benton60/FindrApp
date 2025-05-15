@@ -4,7 +4,9 @@ import android.Manifest
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -27,26 +29,38 @@ class CameraFragment : Fragment() {
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var previewView: PreviewView
 
+    private var lensFacing = CameraSelector.LENS_FACING_BACK // Track current camera
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         val view = inflater.inflate(R.layout.fragment_camera, container, false)
 
-        previewView = view.findViewById(R.id.previewView) // ✅ Use class-level variable
+        previewView = view.findViewById(R.id.previewView)
         val captureButton = view.findViewById<Button>(R.id.captureButton)
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         captureButton.setOnClickListener { takePhoto() }
 
+        val gestureDetector = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                toggleCamera()
+                return true
+            }
+        })
+        previewView.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
+
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requestPermissions() // ✅ Request permissions in `onViewCreated`
+        requestPermissions()
     }
 
     private fun requestPermissions() {
@@ -54,7 +68,7 @@ class CameraFragment : Fragment() {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                startCamera() // ✅ No need to pass previewView (use class-level variable)
+                startCamera()
             } else {
                 Toast.makeText(context, "Camera permission is required", Toast.LENGTH_SHORT).show()
             }
@@ -66,10 +80,10 @@ class CameraFragment : Fragment() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
             try {
-
                 val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+
                 val cameraSelector = CameraSelector.Builder()
-                    .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                    .requireLensFacing(lensFacing)
                     .build()
 
                 val preview = Preview.Builder().build().also {
@@ -80,7 +94,7 @@ class CameraFragment : Fragment() {
 
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
-                    viewLifecycleOwner,  // ✅ Ensure viewLifecycleOwner is used
+                    viewLifecycleOwner,
                     cameraSelector,
                     preview,
                     imageCapture
@@ -91,6 +105,14 @@ class CameraFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
+    private fun toggleCamera() {
+        lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+            CameraSelector.LENS_FACING_FRONT
+        } else {
+            CameraSelector.LENS_FACING_BACK
+        }
+        startCamera()
+    }
 
     private fun takePhoto() {
         val photoFile = File(
@@ -122,3 +144,4 @@ class CameraFragment : Fragment() {
         cameraExecutor.shutdown()
     }
 }
+

@@ -31,8 +31,15 @@ interface ApiService {
     suspend fun getUserByID(@Path("id") id: Long): User
 
     //Posts
-    @POST("posts/createPost")
-    suspend fun createPost(@Body post: Post)
+    @Multipart
+    @POST("posts/createPostWithImage")
+    fun createPostWithImage(@Part image: MultipartBody.Part,
+                            @Part("author") author: RequestBody,
+                            @Part("description") description: RequestBody,
+                            @Part("longitude") longitude: RequestBody,
+                            @Part("latitude") latitude: RequestBody
+    ): Call<Post>
+
     @GET("posts/byAuthor/{author}")
     suspend fun getPostsByAuthor(@Path("author") author: String): List<Post>
     @GET("posts/byLocation/{longitude}/{latitude}")
@@ -44,11 +51,7 @@ interface ApiService {
     @POST("friendships/addFriend/{follower}/{followee}")
     suspend fun addFriend(@Path("follower") follower: Long, @Path("followee") followee: Long)
 
-    //Photos
-    @Multipart
-    @POST("files/upload")
-    fun uploadFile(@Part file: MultipartBody.Part): Call<String>
-
+    // Photos
     @GET("files/download/profile/{userFolder}/{filename}")
     suspend fun downloadProfilePhoto(@Path("userFolder") userFolder: String, @Path("filename") filename: String): ResponseBody
 }
