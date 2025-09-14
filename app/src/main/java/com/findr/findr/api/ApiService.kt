@@ -54,4 +54,6 @@ interface ApiService {
     // Photos
     @GET("files/download/profile/{userFolder}/{filename}")
     suspend fun downloadProfilePhoto(@Path("userFolder") userFolder: String, @Path("filename") filename: String): ResponseBody
+    @GET("files/download/post/{filePath}")
+    suspend fun downloadPostPhoto(@Path("filePath") filePath: String): ResponseBody
 }

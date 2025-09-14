@@ -39,7 +39,7 @@
             android:id="@+id/username_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username Address"
+            android:hint="Email Address"
             android:background="@drawable/input_field_background"
             android:padding="16dp"
             android:textColor="@color/text_dark"

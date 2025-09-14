@@ -2,12 +2,14 @@ package com.findr.findr.fragments
 import android.graphics.BitmapFactory
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.provider.ContactsContract.CommonDataKinds.Im
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getColor
@@ -23,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
+import org.w3c.dom.Text
 
 class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.fragment_home) {
 
@@ -40,7 +43,65 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
         }
     }
 
+
+    //both functions work very similarly to retrieve photos from the api and display them.
     private suspend fun getPosts(){
+        CoroutineScope(Dispatchers.IO).launch {
+            val postsContainer = view?.findViewById<LinearLayout>(R.id.postsContainer)
+            try{
+                //retrieve the posts objects as a list of posts.
+                //this is sent and received as json so there are no images those are retrieved later
+                val location = LocationConfig(context).roughLocation
+                val posts: List<Post> = retrofitClient.getPostsByLocation(location.longitude, location.latitude)
+
+                for(post in posts){
+                    //load the photo associated with the post
+                    var postPic: ResponseBody? = null
+                    try{
+
+                        //this line retrieves the image from the api. the replace call is because the \ in the file url messes with the api endpoint
+                        postPic = retrofitClient.downloadPostPhoto(post.photoPath.replace("\\"," "))
+                        Log.d("PostPics", postPic.toString())
+
+                        //this generates the postView we will add to the linear layout
+                        val postView = LayoutInflater.from(context).inflate(R.layout.item_post, postsContainer, false)
+                        Log.d("Posts", posts.size.toString())
+
+                        //sets the description in the post view
+                        postView.findViewById<TextView>(R.id.postDescription).text = post.author //Yes i Know they're flipped i don't know why.
+                        postView.findViewById<TextView>(R.id.postAuthor).text = post.description + ":" //also its easily worked around so ill deal with it later
+                                                                                                 //TODO -- see comments above
+
+
+                        //retrieves the image view to use later
+                        val postImageView = postView.findViewById<ImageView>(R.id.postImage)
+
+                        // Launch a coroutine for UI update
+                        CoroutineScope(Dispatchers.Main).launch {
+                            // If post picture exists, decode and set it
+                            if (postPic != null) {
+                                val bitmap = BitmapFactory.decodeStream(postPic.byteStream())
+                                if (bitmap != null) {
+                                    postImageView.setImageBitmap(bitmap)
+                                } else {
+                                    Log.e("PostPic", "Failed to decode bitmap for ${post.id}")
+                                }
+                            } else {
+                                Log.w("PostPic", "No profile picture found for ${post.id}, using default")
+                            }
+
+                            postsContainer?.addView(postView)
+                            Log.d("Posts", post.id.toString())
+                        }
+
+                    }catch (e: Exception){
+                        Log.e("PostPic", "Failed to download post picture for ${post.photoPath}", e)
+                    }
+                }
+            }catch (e: Exception){
+                //TODO -- make it jump to the no internet activity
+            }
+        }
     }
     private suspend fun getFriends(){
         CoroutineScope(Dispatchers.IO).launch {
