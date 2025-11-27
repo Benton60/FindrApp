@@ -1,5 +1,10 @@
 package com.findr.findr.fragments
 
+//this fragment is dedicated to displaying information about a specific user.
+//this includes a list of friends, their age, their name, and a description, as well as their posts
+//also this fragment is really similar to the home fragment so if you have a question on a bit of code in here you can probably
+//find more documentation in that file as i wrote it first.
+
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -127,6 +132,8 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
             }
         }
     }
+
+    //both functions work very similarly to retrieve photos/users from the api and display them.
     private suspend fun getPosts() {
         CoroutineScope(Dispatchers.IO).launch {
             val postsContainer = view?.findViewById<LinearLayout>(R.id.postsContainerProfileViewer)
@@ -268,6 +275,11 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
 
 
     //helper functions
+
+    //this function is necessary becuase it reads the photo metadata and orients the picture correctly regardless of which
+    //camera it was taken on. I was having difficulty becuase the front camera on some phones is mirrored
+    //it uses the exif portion of the metadata. It is slightly more time costly to do this but i didn't notice a difference
+    //and in my opinion its necessary
     fun rotateBitmapByExif(file: File, bitmap: Bitmap): Bitmap {
         val exif = ExifInterface(file.absolutePath)
         val orientation = exif.getAttributeInt(

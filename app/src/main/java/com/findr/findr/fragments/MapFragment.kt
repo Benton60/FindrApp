@@ -1,5 +1,12 @@
 package com.findr.findr.fragments
 
+
+//this fragment obviously is the map that shows where friends are.
+//i didn't go too into detail on the documentation as most of it is straight out of googles documentation. which ill link here
+//https://developers.google.com/maps/documentation/android-sdk/overview?section=start
+//its a fairly simple activity for now
+
+
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater

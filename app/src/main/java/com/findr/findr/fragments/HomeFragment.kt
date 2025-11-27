@@ -1,4 +1,8 @@
 package com.findr.findr.fragments
+
+
+
+//this fragment displays the users list of friends and posts by location
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -49,8 +53,13 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
 
 
-    //both functions work very similarly to retrieve photos from the api and display them.
+    //both functions work very similarly to retrieve photos/users from the api and display them.
     private suspend fun getPosts() {
+
+        //the getPosts() function uses the "byLocation" endpoint this is the endpoint that uses a location based algorithm to determine
+        //which posts to serve the user
+
+
         CoroutineScope(Dispatchers.IO).launch {
             val postsContainer = view?.findViewById<LinearLayout>(R.id.postsContainer)
 
@@ -61,7 +70,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
                 for (post in posts) {
 
-                    var postPic: ResponseBody? = null
+                    var postPic: ResponseBody?
 
                     try {
                         postPic = retrofitClient.downloadPostPhoto(
@@ -80,6 +89,9 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
                         val postImageView = postView.findViewById<ImageView>(R.id.postImage)
 
+
+
+                        //this entire coroutinescope is dedicated to orienting the picture correctly
                         CoroutineScope(Dispatchers.Main).launch {
                             if (postPic != null) {
 
@@ -192,6 +204,11 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
 
     //helper functions
+
+    //this function is necessary because it reads the photo metadata and orients the picture correctly regardless of which
+    //camera it was taken on. I was having difficulty because the front camera on some phones is mirrored
+    //it uses the exif portion of the metadata. It is slightly more time costly to do this but i didn't notice a difference
+    //and in my opinion its necessary
     fun rotateBitmapByExif(file: File, bitmap: Bitmap): Bitmap {
         val exif = ExifInterface(file.absolutePath)
         val orientation = exif.getAttributeInt(

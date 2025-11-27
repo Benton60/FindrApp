@@ -102,14 +102,16 @@ class PhotoPreviewFragment : Fragment() {
         return view
     }
 
-
-
-
+    //the sole purpose of ovveriding the ondestory function is to call deletetempimage
     override fun onDestroyView() {
         super.onDestroyView()
         deleteTempImage()
     }
 
+
+
+
+    //this is a cleanup function to prevent leftover photos from building up in the apps temp directory
     private fun deleteTempImage() {
         photoPath?.let {
             val file = File(it)
@@ -124,6 +126,7 @@ class PhotoPreviewFragment : Fragment() {
         }
     }
 
+    //this function is necessary becuase it wants to store the photos sideways
     private fun getRotatedBitmap(filePath: String): Bitmap {
         val originalBitmap = BitmapFactory.decodeFile(filePath)
 
@@ -194,8 +197,10 @@ class PhotoPreviewFragment : Fragment() {
         }
     }
 
+
+    //this is what uploads the photo to the api when the upload button is clicked
+    //it looks insanely humongous and complicated but 50 out of the 70 some lines are error handling and checking
     private fun uploadPostWithImage() {
-        val descriptionEditText = view?.findViewById<EditText>(R.id.descriptionEditText)
         if (photoPath == null) {
             requireActivity().runOnUiThread {
                 Toast.makeText(requireContext(), "No photo to upload", Toast.LENGTH_SHORT).show()
