@@ -48,6 +48,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
     }
 
 
+
     //both functions work very similarly to retrieve photos from the api and display them.
     private suspend fun getPosts() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -170,7 +171,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
                         friendView.setOnClickListener {
                             val clickedUsername = friend.username
-                            val fragment = ProfileViewerFragment.newInstance(clickedUsername)
+                            val fragment = ProfileViewerFragment.newInstance(clickedUsername, retrofitClient)
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.fragmentContainer, fragment)
                                 .addToBackStack(null)
@@ -190,7 +191,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
 
 
-    //helper functions2
+    //helper functions
     fun rotateBitmapByExif(file: File, bitmap: Bitmap): Bitmap {
         val exif = ExifInterface(file.absolutePath)
         val orientation = exif.getAttributeInt(

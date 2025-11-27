@@ -1,22 +1,44 @@
 package com.findr.findr.fragments
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.graphics.drawable.GradientDrawable
+import android.media.ExifInterface
 import android.os.Bundle
+import android.provider.ContactsContract.CommonDataKinds.Im
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat.getColor
 import com.findr.findr.R
+import com.findr.findr.api.ApiService
+import com.findr.findr.api.RetrofitClient
+import com.findr.findr.config.LocationConfig
+import com.findr.findr.entity.Post
+import com.findr.findr.entity.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
+import java.io.File
 
-class ProfileViewerFragment : Fragment() {
+class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R.layout.fragment_profile_viewer) {
 
     // Key for arguments
     companion object {
         private const val ARG_USERNAME = "username"
 
         // Factory method to create a new instance of this fragment with a username
-        fun newInstance(username: String): ProfileViewerFragment {
-            val fragment = ProfileViewerFragment()
+        fun newInstance(username: String, retrofitClient: ApiService): ProfileViewerFragment {
+            val fragment = ProfileViewerFragment(retrofitClient)
             val args = Bundle()
             args.putString(ARG_USERNAME, username)
             fragment.arguments = args
@@ -39,5 +61,247 @@ class ProfileViewerFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile_viewer, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                getPosts()
+                getFriends()
+                loadUserProfile()
+            }catch(e: SecurityException){
+                CoroutineScope(Dispatchers.Main).launch{
+                    Toast.makeText(requireContext(), "Unable to access location", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
+
+
+    private fun loadUserProfile() {
+        CoroutineScope(Dispatchers.IO).launch {
+            // Download profile picture
+            var profilePic: ResponseBody? = null
+            try {
+                profilePic = retrofitClient.downloadProfilePhoto(username.toString(), "profile.png")
+            } catch (e: Exception) {
+                Log.e("ProfilePic", "Failed to download profile picture for $username", e)
+            }
+
+            // Get user info
+            var user: User? = null
+            try {
+                user = retrofitClient.getUserByUsername(username.toString())
+            } catch (e: Exception) {
+                Log.e("UserFetch", "Failed to get user info for ${username.toString()}", e)
+            }
+
+            // Switch to main thread to update UI
+            withContext(Dispatchers.Main) {
+                val profilePicture = view?.findViewById<ImageView>(R.id.profileImageProfileView)
+                val tvName = view?.findViewById<TextView>(R.id.tvNameProfileView)
+                val tvUsername = view?.findViewById<TextView>(R.id.tvUsernameProfileView)
+                val tvAge = view?.findViewById<TextView>(R.id.tvAgeProfileView)
+                val tvDescription = view?.findViewById<TextView>(R.id.tvDescriptionProfileView)
+
+                // Set user info
+                tvName?.text = user?.name ?: "Unknown Name"
+                tvUsername?.text = user?.username ?: "@unknown"
+                tvAge?.text = user?.age?.toString() ?: "N/A"
+                tvDescription?.text = user?.description ?: ""
+
+                // Set profile picture
+                if (profilePic != null) {
+                    val bitmap = BitmapFactory.decodeStream(profilePic.byteStream())
+                    if (bitmap != null) {
+                        profilePicture?.setImageBitmap(bitmap)
+                    } else {
+                        Log.e("ProfilePic", "Failed to decode bitmap for ${username.toString()}")
+                    }
+                } else {
+                    Log.w("ProfilePic", "No profile picture found for ${username.toString()}, using default")
+                }
+            }
+        }
+    }
+    private suspend fun getPosts() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val postsContainer = view?.findViewById<LinearLayout>(R.id.postsContainerProfileViewer)
+
+            try {
+                val location = LocationConfig(context).roughLocation
+                val posts: List<Post> =
+                    retrofitClient.getPostsByAuthor(username.toString())
+
+                for (post in posts) {
+
+                    var postPic: ResponseBody? = null
+
+                    try {
+                        postPic = retrofitClient.downloadPostPhoto(
+                            post.photoPath.replace("\\", " ")
+                        )
+
+                        // Inflate post view
+                        val postView = LayoutInflater.from(context)
+                            .inflate(R.layout.item_post, postsContainer, false)
+
+                        postView.findViewById<TextView>(R.id.postAuthor).text =
+                            post.description
+
+                        postView.findViewById<TextView>(R.id.postDescription).text =
+                            post.author
+
+                        val postImageView = postView.findViewById<ImageView>(R.id.postImage)
+
+                        CoroutineScope(Dispatchers.Main).launch {
+                            if (postPic != null) {
+
+                                // -------------------------------
+                                // STEP 1: Save image to temp file
+                                // -------------------------------
+                                val tempFile = File.createTempFile("post_", ".jpg", context?.cacheDir)
+                                tempFile.outputStream().use { out ->
+                                    out.write(postPic.bytes())
+                                }
+
+                                // -------------------------------
+                                // STEP 2: Decode bitmap
+                                // -------------------------------
+                                val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+
+                                if (bitmap != null) {
+
+                                    // -------------------------------
+                                    // STEP 3: Rotate based on EXIF
+                                    // -------------------------------
+                                    val correctedBitmap =
+                                        rotateBitmapByExif(tempFile, bitmap)
+
+                                    postImageView.setImageBitmap(correctedBitmap)
+
+                                } else {
+                                    Log.e("PostPic", "Failed to decode bitmap for ${post.id}")
+                                }
+                            }
+
+                            postsContainer?.addView(postView)
+                        }
+
+                    } catch (e: Exception) {
+                        Log.e("PostPic",
+                            "Failed to download or decode post picture for ${post.photoPath}",
+                            e
+                        )
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.e("Posts", "Failed to load posts", e)
+            }
+        }
+    }
+    private suspend fun getFriends(){
+        CoroutineScope(Dispatchers.IO).launch {
+            val friendsContainer = view?.findViewById<LinearLayout>(R.id.friendsContainerProfileViewer)
+            try {
+                val friends: List<User> = retrofitClient.getFriendsByUsername(username.toString())
+
+                for (friend in friends) {
+                    // Load the profile photo
+                    var profilePic: ResponseBody? = null
+                    try {
+                        profilePic = retrofitClient.downloadProfilePhoto(friend.username, "profile.png")
+                    } catch (e: Exception) {
+                        Log.e("ProfilePic", "Failed to download profile picture for ${friend.username}", e)
+                    }
+
+                    // Inflate friend item layout
+                    val friendView = LayoutInflater.from(context).inflate(R.layout.item_friend, friendsContainer, false)
+                    Log.d("Friends", friends.size.toString())
+
+                    friendView.findViewById<TextView>(R.id.friendName).text = friend.username
+
+                    // Change the circle around the user to green
+                    val strokeWidth = (3 * resources.displayMetrics.density).toInt() // Convert 3 pixels to 3dp
+                    val drawable = friendView.findViewById<View>(R.id.color_border).background as GradientDrawable
+                    drawable.setStroke(strokeWidth, getColor(requireContext(), R.color.green))
+
+                    val friendImageView = friendView.findViewById<ImageView>(R.id.friendImage)
+
+                    // Launch a coroutine for UI update
+                    CoroutineScope(Dispatchers.Main).launch {
+                        // If profile picture exists, decode and set it
+                        if (profilePic != null) {
+                            val bitmap = BitmapFactory.decodeStream(profilePic.byteStream())
+                            if (bitmap != null) {
+                                friendImageView.setImageBitmap(bitmap)
+                            } else {
+                                Log.e("ProfilePic", "Failed to decode bitmap for ${friend.username}")
+                            }
+                        } else {
+                            Log.w("ProfilePic", "No profile picture found for ${friend.username}, using default")
+                        }
+
+                        friendView.setOnClickListener {
+                            val clickedUsername = friend.username
+                            val fragment = ProfileViewerFragment.newInstance(clickedUsername, retrofitClient)
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragmentContainer, fragment)
+                                .addToBackStack(null)
+                                .commit()
+                        }
+
+                        friendsContainer?.addView(friendView)
+                        Log.d("Friends", friend.username)
+                    }
+                }
+            } catch (e: Exception) {
+                //TODO -- make it jump to the no internet activity
+            }
+        }
+    }
+
+
+
+    //helper functions
+    fun rotateBitmapByExif(file: File, bitmap: Bitmap): Bitmap {
+        val exif = ExifInterface(file.absolutePath)
+        val orientation = exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )
+
+        val matrix = Matrix()
+
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.preScale(-1f, 1f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.preScale(1f, -1f)
+
+            ExifInterface.ORIENTATION_TRANSPOSE -> { // flip + rotate 90
+                matrix.preScale(-1f, 1f)
+                matrix.postRotate(90f)
+            }
+            ExifInterface.ORIENTATION_TRANSVERSE -> { // flip + rotate 270
+                matrix.preScale(-1f, 1f)
+                matrix.postRotate(270f)
+            }
+        }
+
+        return Bitmap.createBitmap(
+            bitmap,
+            0, 0,
+            bitmap.width,
+            bitmap.height,
+            matrix,
+            true
+        )
     }
 }
