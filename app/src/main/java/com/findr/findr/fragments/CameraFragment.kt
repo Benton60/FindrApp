@@ -1,6 +1,12 @@
 package com.findr.findr.fragments
 
 import android.Manifest
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.BitmapFactory.*
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -22,6 +28,13 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import com.findr.findr.R
 import androidx.camera.view.PreviewView
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.FileOutputStream
+import kotlin.math.max
+import android.graphics.BitmapFactory.decodeFile as decodeFile1
 
 class CameraFragment : Fragment() {
 
@@ -114,34 +127,115 @@ class CameraFragment : Fragment() {
         startCamera()
     }
 
-    private fun takePhoto() {
-        val photoFile = File(
-            requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-            "IMG_${System.currentTimeMillis()}.jpg"
-        )
-
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-        imageCapture?.takePicture(outputOptions, ContextCompat.getMainExecutor(requireContext()),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    val photoPreviewFragment = PhotoPreviewFragment.newInstance(photoFile.absolutePath)
-
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, photoPreviewFragment)
-                        .addToBackStack(null)
-                        .commit()
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    Toast.makeText(context, "Capture Failed: ${exception.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
     }
+
+    private fun takePhoto() {
+        val rawFile = File(
+            requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+            "IMG_${System.currentTimeMillis()}.jpg"
+        )
+
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(rawFile).build()
+
+        imageCapture?.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(requireContext()),
+            object : ImageCapture.OnImageSavedCallback {
+
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+
+                    lifecycleScope.launch {
+                        // Rotate + downscale to 1080p — NO MIRRORING
+                        val processedFile = processPhotoUpright1080p(
+                            requireContext(),
+                            rawFile
+                        )
+
+                        val previewFragment =
+                            PhotoPreviewFragment.newInstance(processedFile.absolutePath)
+
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainer, previewFragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    Toast.makeText(requireContext(), "Capture Failed: ${exception.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+    }
+
+    suspend fun processPhotoUpright1080p(
+        context: Context,
+        inputFile: File
+    ): File = withContext(Dispatchers.IO) {
+
+        val exif = ExifInterface(inputFile.absolutePath)
+        val orientation = exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )
+
+        // Decode efficiently to max 1080p
+        val bitmap = decodeDownscaledBitmap(inputFile, 1080)
+
+        val matrix = Matrix()
+
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+        }
+
+        val rotated = Bitmap.createBitmap(
+            bitmap,
+            0, 0,
+            bitmap.width, bitmap.height,
+            matrix,
+            true
+        )
+
+        val outFile = File(
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+            "PROCESSED_${System.currentTimeMillis()}.jpg"
+        )
+
+        FileOutputStream(outFile).use { stream ->
+            rotated.compress(Bitmap.CompressFormat.JPEG, 85, stream)
+            stream.flush()
+        }
+
+        bitmap.recycle()
+        rotated.recycle()
+
+        return@withContext outFile
+    }
+
+    fun decodeDownscaledBitmap(file: File, maxSize: Int): Bitmap {
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(file.absolutePath, options)
+
+        val maxDim = max(options.outWidth, options.outHeight)
+        var sample = 1
+
+        if (maxDim > maxSize) {
+            sample = maxDim / maxSize
+        }
+
+        options.inJustDecodeBounds = false
+        options.inSampleSize = sample
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888
+
+        return BitmapFactory.decodeFile(file.absolutePath, options)
+    }
+
+
 }
 

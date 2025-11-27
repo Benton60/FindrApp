@@ -1,54 +1,49 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="8dp">
+    android:padding="0dp">
 
-    <!-- Circular Frame for Profile Picture + Border -->
-    <FrameLayout
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="400dp"
-        android:gravity="center">
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="30dp"
+        app:cardPreventCornerOverlap="true">
 
-        <!-- Post Picture inside CardView -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="30dp"
-            app:cardPreventCornerOverlap="true">
+        <ImageView
+            android:id="@+id/postImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="false"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_post"
+            android:contentDescription="Post Image" />
 
-            <ImageView
-                android:id="@+id/postImage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_post"
-                android:contentDescription="Post Image" />
-
-        </androidx.cardview.widget.CardView>
-    </FrameLayout>
+    </androidx.cardview.widget.CardView>
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <TextView
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
+        <TextView
             android:id="@+id/postAuthor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Author"
             android:textSize="16sp"
             android:textColor="@android:color/white"
-            android:gravity="center"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:paddingHorizontal="4dp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
+
         <TextView
             android:id="@+id/postDescription"
             android:layout_width="wrap_content"
@@ -56,12 +51,13 @@
             android:text="Description"
             android:textSize="14sp"
             android:textColor="@android:color/white"
-            android:gravity="center"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:paddingHorizontal="4dp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
+
     </LinearLayout>
 
 </LinearLayout>

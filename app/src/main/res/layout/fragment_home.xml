@@ -12,8 +12,8 @@
         android:id="@+id/horizontalScrollViewFriends"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:padding="8dp"
+        android:background="#000000"
+        android:padding="2dp"
         android:scrollbars="none"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="8dp" />
+            android:padding="4dp" />
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

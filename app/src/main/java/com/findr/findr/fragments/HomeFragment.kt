@@ -1,6 +1,9 @@
 package com.findr.findr.fragments
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.graphics.drawable.GradientDrawable
+import android.media.ExifInterface
 import android.os.Bundle
 import android.provider.ContactsContract.CommonDataKinds.Im
 import android.util.Log
@@ -26,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.w3c.dom.Text
+import java.io.File
 
 class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.fragment_home) {
 
@@ -45,61 +49,80 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
 
     //both functions work very similarly to retrieve photos from the api and display them.
-    private suspend fun getPosts(){
+    private suspend fun getPosts() {
         CoroutineScope(Dispatchers.IO).launch {
             val postsContainer = view?.findViewById<LinearLayout>(R.id.postsContainer)
-            try{
-                //retrieve the posts objects as a list of posts.
-                //this is sent and received as json so there are no images those are retrieved later
+
+            try {
                 val location = LocationConfig(context).roughLocation
-                val posts: List<Post> = retrofitClient.getPostsByLocation(location.longitude, location.latitude)
+                val posts: List<Post> =
+                    retrofitClient.getPostsByLocation(location.longitude, location.latitude)
 
-                for(post in posts){
-                    //load the photo associated with the post
+                for (post in posts) {
+
                     var postPic: ResponseBody? = null
-                    try{
 
-                        //this line retrieves the image from the api. the replace call is because the \ in the file url messes with the api endpoint
-                        postPic = retrofitClient.downloadPostPhoto(post.photoPath.replace("\\"," "))
-                        Log.d("PostPics", postPic.toString())
+                    try {
+                        postPic = retrofitClient.downloadPostPhoto(
+                            post.photoPath.replace("\\", " ")
+                        )
 
-                        //this generates the postView we will add to the linear layout
-                        val postView = LayoutInflater.from(context).inflate(R.layout.item_post, postsContainer, false)
-                        Log.d("Posts", posts.size.toString())
+                        // Inflate post view
+                        val postView = LayoutInflater.from(context)
+                            .inflate(R.layout.item_post, postsContainer, false)
 
-                        //sets the description in the post view
-                        postView.findViewById<TextView>(R.id.postDescription).text = post.author //Yes i Know they're flipped i don't know why.
-                        postView.findViewById<TextView>(R.id.postAuthor).text = post.description + ":" //also its easily worked around so ill deal with it later
-                                                                                                 //TODO -- see comments above
+                        postView.findViewById<TextView>(R.id.postAuthor).text =
+                            post.description
 
+                        postView.findViewById<TextView>(R.id.postDescription).text =
+                            post.author
 
-                        //retrieves the image view to use later
                         val postImageView = postView.findViewById<ImageView>(R.id.postImage)
 
-                        // Launch a coroutine for UI update
                         CoroutineScope(Dispatchers.Main).launch {
-                            // If post picture exists, decode and set it
                             if (postPic != null) {
-                                val bitmap = BitmapFactory.decodeStream(postPic.byteStream())
+
+                                // -------------------------------
+                                // STEP 1: Save image to temp file
+                                // -------------------------------
+                                val tempFile = File.createTempFile("post_", ".jpg", context?.cacheDir)
+                                tempFile.outputStream().use { out ->
+                                    out.write(postPic.bytes())
+                                }
+
+                                // -------------------------------
+                                // STEP 2: Decode bitmap
+                                // -------------------------------
+                                val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+
                                 if (bitmap != null) {
-                                    postImageView.setImageBitmap(bitmap)
+
+                                    // -------------------------------
+                                    // STEP 3: Rotate based on EXIF
+                                    // -------------------------------
+                                    val correctedBitmap =
+                                        rotateBitmapByExif(tempFile, bitmap)
+
+                                    postImageView.setImageBitmap(correctedBitmap)
+
                                 } else {
                                     Log.e("PostPic", "Failed to decode bitmap for ${post.id}")
                                 }
-                            } else {
-                                Log.w("PostPic", "No profile picture found for ${post.id}, using default")
                             }
 
                             postsContainer?.addView(postView)
-                            Log.d("Posts", post.id.toString())
                         }
 
-                    }catch (e: Exception){
-                        Log.e("PostPic", "Failed to download post picture for ${post.photoPath}", e)
+                    } catch (e: Exception) {
+                        Log.e("PostPic",
+                            "Failed to download or decode post picture for ${post.photoPath}",
+                            e
+                        )
                     }
                 }
-            }catch (e: Exception){
-                //TODO -- make it jump to the no internet activity
+
+            } catch (e: Exception) {
+                Log.e("Posts", "Failed to load posts", e)
             }
         }
     }
@@ -153,5 +176,46 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                 //TODO -- make it jump to the no internet activity
             }
         }
+    }
+
+
+
+
+    //helper functions2
+    fun rotateBitmapByExif(file: File, bitmap: Bitmap): Bitmap {
+        val exif = ExifInterface(file.absolutePath)
+        val orientation = exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )
+
+        val matrix = Matrix()
+
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.preScale(-1f, 1f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.preScale(1f, -1f)
+
+            ExifInterface.ORIENTATION_TRANSPOSE -> { // flip + rotate 90
+                matrix.preScale(-1f, 1f)
+                matrix.postRotate(90f)
+            }
+            ExifInterface.ORIENTATION_TRANSVERSE -> { // flip + rotate 270
+                matrix.preScale(-1f, 1f)
+                matrix.postRotate(270f)
+            }
+        }
+
+        return Bitmap.createBitmap(
+            bitmap,
+            0, 0,
+            bitmap.width,
+            bitmap.height,
+            matrix,
+            true
+        )
     }
 }
