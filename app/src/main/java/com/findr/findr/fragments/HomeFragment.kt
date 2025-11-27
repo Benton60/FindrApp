@@ -168,6 +168,15 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                             Log.w("ProfilePic", "No profile picture found for ${friend.username}, using default")
                         }
 
+                        friendView.setOnClickListener {
+                            val clickedUsername = friend.username
+                            val fragment = ProfileViewerFragment.newInstance(clickedUsername)
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragmentContainer, fragment)
+                                .addToBackStack(null)
+                                .commit()
+                        }
+
                         friendsContainer?.addView(friendView)
                         Log.d("Friends", friend.username)
                     }
