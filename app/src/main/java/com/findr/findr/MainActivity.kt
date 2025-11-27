@@ -44,6 +44,8 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         atStart()
+
+        //this allows the user to click the profile icon
         findViewById<TextView>(R.id.profileLink).setOnClickListener{
             startActivity(Intent(this, LoginActivity::class.java))
         }
@@ -54,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         atStart()
     }
 
+    //the atStart() function is a general purpose function that gets called whenever this activity becomes live
+    //it mostly holds credential/permissions interactions
     private fun atStart() {
         if(!hasPermissions()){
             requestPermissions()
@@ -62,7 +66,8 @@ class MainActivity : AppCompatActivity() {
         onClickForNavBar()
         updateUserLocation()
     }
-    //this function checks whether there is a validation saved in the app's data
+
+    //this function checks whether there are user credentials saved in the app's data
     private fun loadCredentials() {
         try {
             val fileInputStream = BufferedReader(InputStreamReader(openFileInput("Authentication.txt")))
@@ -132,14 +137,20 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
+
+
+    //this array holds all the permissions needed for the application to work
+    //a.k.a. camera and location + whatever else i eventually need
     private val requiredPermissions = arrayOf(
         Manifest.permission.CAMERA,
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
+    //this class is what interacts with Android and actually requests the permissions
     private val requestPermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val allGranted = permissions.all { it.value }
             if(!allGranted){
+                //right now this closes the app if the user doesn't accept all permissions.
                 finish()
             }else{
                 replaceFragment(HomeFragment(retrofitClient))

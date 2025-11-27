@@ -16,6 +16,11 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+
+
+//this interface acts as the interface for the Retrofit Client class and
+//provides the functions used to interact with the backend api
+
 interface ApiService {
 
     //Users

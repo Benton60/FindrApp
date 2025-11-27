@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 public class LocationConfig {
 
-    private int multiplier = 100000;
     private final FusedLocationProviderClient fusedLocationClient;
     private final Context context;
 

@@ -3,12 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-feature android:name="android.hardware.camera.any"/>
-
-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" />
 
     <application
         android:name=".MyApplication"
@@ -33,6 +31,15 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <meta-data
+            android:name="androidx.camera.defaultConfigProvider"
+            android:value="androidx.camera.core.impl.Camera2Config" />
+
+        <!-- ✅ This will be replaced at build time by Gradle -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
         <activity
             android:name=".CreateAccountActivity"
             android:exported="false"
@@ -41,21 +48,11 @@
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
-
-        <meta-data
-            android:name="androidx.camera.defaultConfigProvider"
-            android:value="androidx.camera.core.impl.Camera2Config" />
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC1Ma8ZLlOWRLPGkXwBx6tto3JzhXrCz2M" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
