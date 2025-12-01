@@ -8,6 +8,8 @@ This repo is the backend API.
 The back-end is linked here.
 https://github.com/Benton60/FindrAPI
 
+Images  of the app can be found under the Images_And_Videos folder
+
 ## How Findr began
 Findr began as the product of boredom during my freshman year of college. I was looking for side projects that would stretch my talents
 and decided I wanted a project that stretched across a full tech stack. A social-media platform was the first thing that came to mind.
