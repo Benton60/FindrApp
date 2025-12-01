@@ -25,21 +25,21 @@ previous experience with java and more specifically the JDBC. I chose an android
 as a way to learn new technologies but more to see how the technologies I already used work together to deliver a full-scale product.
 As the development process continued, however, I began to find new ideas and technologies that I wanted to implement, and Findr has continued to grow since then.
 
-##APP Specifics
+## APP Specifics
 
 FindrApp is the git repository for the frontend. It is written as a android client. You'll quickly notice while most files are in kotlin, some files are written in java.
 This is due to Java and Kotlin being nearly perfectly interoperable, so when I was creating my entity classes it was simpler to directly copy the java files from the API 
 rather than try to rewrite them in kotlin. Also I find I am more comfortable tackling new concepts in java so the Retrofit client and LocationConfig classes are written 
 in java. 
 
-###API Interactions
+### API Interactions
 
 The Findr App connects to the backend API using Retrofit. All API credentials should be stored in a 
 local.properties file. You can find the specific API endpoints that are available and their function call requirements in the "com/findr/findr/api/ApiService.kt" file. 
 Throughout the code base you will find 'retroFitClient' calls, when you see it lowercase it has been built using the APiService interface. And finally the retrofit client 
 has several extra functions to help with credential checking you can find those functions in the RetrofitClient.java file next to the ApiService.kt file.
 
-###Fragments
+### Fragments
 
 Rather than switch entire activities when switching between the map and home screens. I used fragments. Using fragments allowed me to keep a consistent button ribbon
 along the bottom and the profile bar across the top. You can see the list of fragments in the "com/findr/findr/fragments" folder. 
