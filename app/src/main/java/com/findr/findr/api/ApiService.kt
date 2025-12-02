@@ -66,4 +66,6 @@ interface ApiService {
     suspend fun addLike(@Path("postID") postID: Long): ResponseBody
     @GET("likes/removeLike/{postID}")
     suspend fun  removeLike(@Path("postID") postID: Long): ResponseBody
+    @GET("likes/checkLike/{postID}")
+    suspend fun checkLike(@Path("postID") postID: Long): ResponseBody
 }

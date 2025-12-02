@@ -58,6 +58,12 @@
             android:ellipsize="end"
             android:textStyle="bold" />
 
+        <ImageButton
+            android:layout_marginTop="8dp"
+            android:id="@+id/postHeart"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:background="@drawable/ic_heart"/>
     </LinearLayout>
 
 </LinearLayout>

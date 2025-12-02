@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.HorizontalScrollView
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -87,7 +88,11 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                         postView.findViewById<TextView>(R.id.postDescription).text =
                             post.author
 
+
+                        //postView.findViewById<ImageButton>(R.id.postHeart).setBackgroundResource(R.drawable.ic_heart_filled)
+
                         val postImageView = postView.findViewById<ImageView>(R.id.postImage)
+
 
 
 
