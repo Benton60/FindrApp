@@ -44,7 +44,6 @@ interface ApiService {
                             @Part("longitude") longitude: RequestBody,
                             @Part("latitude") latitude: RequestBody
     ): Call<Post>
-
     @GET("posts/byAuthor/{author}")
     suspend fun getPostsByAuthor(@Path("author") author: String): List<Post>
     @GET("posts/byLocation/{longitude}/{latitude}")
@@ -61,4 +60,10 @@ interface ApiService {
     suspend fun downloadProfilePhoto(@Path("userFolder") userFolder: String, @Path("filename") filename: String): ResponseBody
     @GET("files/download/post/{filePath}")
     suspend fun downloadPostPhoto(@Path("filePath") filePath: String): ResponseBody
+
+    //Likes
+    @GET("likes/addLike/{postID}")
+    suspend fun addLike(@Path("postID") postID: Long): ResponseBody
+    @GET("likes/removeLike/{postID}")
+    suspend fun  removeLike(@Path("postID") postID: Long): ResponseBody
 }
