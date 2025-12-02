@@ -77,7 +77,6 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                         postPic = retrofitClient.downloadPostPhoto(
                             post.photoPath.replace("\\", " ")
                         )
-
                         // Inflate post view
                         val postView = LayoutInflater.from(context)
                             .inflate(R.layout.item_post, postsContainer, false)
@@ -87,15 +86,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
                         postView.findViewById<TextView>(R.id.postDescription).text =
                             post.author
-
-
-                        //postView.findViewById<ImageButton>(R.id.postHeart).setBackgroundResource(R.drawable.ic_heart_filled)
-
                         val postImageView = postView.findViewById<ImageView>(R.id.postImage)
-
-
-
-
                         //this entire coroutinescope is dedicated to orienting the picture correctly
                         CoroutineScope(Dispatchers.Main).launch {
                             if (postPic != null) {
@@ -129,6 +120,24 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                             }
 
                             postsContainer?.addView(postView)
+                        }
+
+
+
+                        //this is to check whether the post has been like previously and set the icon_background accordingly
+                        //this is wrapped in a coroutinescope to separate it from the rest of the post loading runtime. likes should be checked concurrently not linearly
+                        //to help with perceived latency
+                        CoroutineScope(Dispatchers.IO).launch {
+                            if(retrofitClient.checkLike(post.id)){
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    postView.findViewById<ImageButton>(R.id.postHeart).setBackgroundResource(R.drawable.ic_heart_filled)
+                                }
+                            }else{
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    postView.findViewById<ImageButton>(R.id.postHeart).setBackgroundResource(R.drawable.ic_heart)
+                                }
+                            }
+
                         }
 
                     } catch (e: Exception) {
