@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -75,6 +77,7 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                 getPosts()
                 getFriends()
                 loadUserProfile()
+                setupFriendButton()
             }catch(e: SecurityException){
                 CoroutineScope(Dispatchers.Main).launch{
                     Toast.makeText(requireContext(), "Unable to access location", Toast.LENGTH_SHORT).show()
@@ -118,6 +121,8 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                 tvAge?.text = user?.age?.toString() ?: "N/A"
                 tvDescription?.text = user?.description ?: ""
 
+
+
                 // Set profile picture
                 if (profilePic != null) {
                     val bitmap = BitmapFactory.decodeStream(profilePic.byteStream())
@@ -132,7 +137,6 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
             }
         }
     }
-
     //both functions work very similarly to retrieve photos/users from the api and display them.
     private suspend fun getPosts() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -197,6 +201,46 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
 
                             postsContainer?.addView(postView)
                         }
+
+
+
+                        //this is to check whether the post has been like previously and set the icon_background accordingly
+                        //this is wrapped in a coroutinescope to separate it from the rest of the post loading runtime. likes should be checked concurrently not linearly
+                        //to help with perceived latency
+                        val postHeart = postView.findViewById<ImageButton>(R.id.postHeart)
+
+                        val isLiked = withContext(Dispatchers.IO) { retrofitClient.checkLike(post.id) }
+
+                        //set background
+                        withContext(Dispatchers.Main) {
+                            if (isLiked) {
+                                postHeart.setBackgroundResource(R.drawable.ic_heart_filled)
+                            } else {
+                                postHeart.setBackgroundResource(R.drawable.ic_heart)
+                            }
+                        }
+                        postHeart.tag = isLiked
+
+                        postHeart.setOnClickListener { btn ->
+                            val liked = btn.tag as Boolean
+                            btn.tag = !liked // toggle
+
+                            if (!liked) {
+                                postHeart.setBackgroundResource(R.drawable.ic_heart_filled)
+                            } else {
+                                postHeart.setBackgroundResource(R.drawable.ic_heart)
+                            }
+
+                            // Fire-and-forget network request
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if (!liked) {
+                                    retrofitClient.addLike(post.id)
+                                } else {
+                                    retrofitClient.removeLike(post.id)
+                                }
+                            }
+                        }
+
 
                     } catch (e: Exception) {
                         Log.e("PostPic",
@@ -273,6 +317,36 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
     }
 
 
+    //this function holds all logic relating to adding/removing friendships
+    private suspend fun setupFriendButton(){
+        var btnFriends = view?.findViewById<Button>(R.id.btnFriendProfileView)
+        if (btnFriends != null) {
+            btnFriends.setOnClickListener{
+                if(btnFriends.text == "Remove Friend"){
+                    CoroutineScope(Dispatchers.IO).launch {
+                        retrofitClient.removeFriend(username.toString())
+                    }
+                    btnFriends?.text = "Add Friend"
+                }else if(btnFriends.text == "Add Friend"){
+                    CoroutineScope(Dispatchers.IO).launch {
+                        retrofitClient.addFriend(username.toString())
+                    }
+                    btnFriends?.text = "Remove Friend"
+                }
+            }
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            if(retrofitClient.checkFriendshipStatus(username.toString())){
+                withContext(Dispatchers.Main) {
+                    btnFriends?.text = "Remove Friend"
+                }
+            }else{
+                withContext(Dispatchers.Main) {
+                    btnFriends?.text = "Add Friend"
+                }
+            }
+        }
+    }
 
     //helper functions
 

@@ -22,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
@@ -61,7 +62,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
         //which posts to serve the user
 
 
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.IO).launch{
             val postsContainer = view?.findViewById<LinearLayout>(R.id.postsContainer)
 
             try {
@@ -88,7 +89,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                             post.author
                         val postImageView = postView.findViewById<ImageView>(R.id.postImage)
                         //this entire coroutinescope is dedicated to orienting the picture correctly
-                        CoroutineScope(Dispatchers.Main).launch {
+                        withContext(Dispatchers.Main) {
                             if (postPic != null) {
 
                                 // -------------------------------
@@ -127,18 +128,40 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                         //this is to check whether the post has been like previously and set the icon_background accordingly
                         //this is wrapped in a coroutinescope to separate it from the rest of the post loading runtime. likes should be checked concurrently not linearly
                         //to help with perceived latency
-                        CoroutineScope(Dispatchers.IO).launch {
-                            if(retrofitClient.checkLike(post.id)){
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    postView.findViewById<ImageButton>(R.id.postHeart).setBackgroundResource(R.drawable.ic_heart_filled)
-                                }
-                            }else{
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    postView.findViewById<ImageButton>(R.id.postHeart).setBackgroundResource(R.drawable.ic_heart)
-                                }
+                        val postHeart = postView.findViewById<ImageButton>(R.id.postHeart)
+
+                        val isLiked = withContext(Dispatchers.IO) { retrofitClient.checkLike(post.id) }
+
+                        //set background
+                        withContext(Dispatchers.Main) {
+                            if (isLiked) {
+                                postHeart.setBackgroundResource(R.drawable.ic_heart_filled)
+                            } else {
+                                postHeart.setBackgroundResource(R.drawable.ic_heart)
+                            }
+                        }
+                        postHeart.tag = isLiked
+
+                        postHeart.setOnClickListener { btn ->
+                            val liked = btn.tag as Boolean
+                            btn.tag = !liked // toggle
+
+                            if (!liked) {
+                                postHeart.setBackgroundResource(R.drawable.ic_heart_filled)
+                            } else {
+                                postHeart.setBackgroundResource(R.drawable.ic_heart)
                             }
 
+                            // Fire-and-forget network request
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if (!liked) {
+                                    retrofitClient.addLike(post.id)
+                                } else {
+                                    retrofitClient.removeLike(post.id)
+                                }
+                            }
                         }
+
 
                     } catch (e: Exception) {
                         Log.e("PostPic",
@@ -259,4 +282,5 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
             true
         )
     }
+
 }

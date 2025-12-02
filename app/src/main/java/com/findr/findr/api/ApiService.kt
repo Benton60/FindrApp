@@ -9,6 +9,7 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -52,8 +53,12 @@ interface ApiService {
     //Friends
     @GET("friendships/friends/{username}")
     suspend fun getFriendsByUsername(@Path("username") username: String): List<User>
-    @POST("friendships/addFriend/{follower}/{followee}")
-    suspend fun addFriend(@Path("follower") follower: Long, @Path("followee") followee: Long)
+    @POST("friendships/addFriend/{username}")
+    suspend fun addFriend(@Path("username") username: String)
+    @DELETE("friendships/removeFriend/{username}")
+    suspend fun removeFriend(@Path("username") username:String)
+    @GET("friendships/checkFriendshipStatus/{username}")
+    suspend fun checkFriendshipStatus(@Path("username") username: String): Boolean
 
     // Photos
     @GET("files/download/profile/{userFolder}/{filename}")
@@ -62,9 +67,9 @@ interface ApiService {
     suspend fun downloadPostPhoto(@Path("filePath") filePath: String): ResponseBody
 
     //Likes
-    @GET("likes/addLike/{postID}")
+    @POST("likes/addLike/{postID}")
     suspend fun addLike(@Path("postID") postID: Long): ResponseBody
-    @GET("likes/removeLike/{postID}")
+    @POST("likes/removeLike/{postID}")
     suspend fun  removeLike(@Path("postID") postID: Long): ResponseBody
     @GET("likes/checkLike/{postID}")
     suspend fun checkLike(@Path("postID") postID: Long): Boolean
