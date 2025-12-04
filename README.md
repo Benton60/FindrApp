@@ -52,8 +52,10 @@ Video Fragment - is currently unused i might get rid of it. it was originally su
 ### Testing Accounts
 
 You obviously will need to make your own for your own database
-
+Also there are a lot more accounts than this. When i first began testing I 
+didn't keep track of the accounts i made and then i forgot their passwords
+which are conveniently encrypted 
 1)user, password
 2)user2, password
-
+3)test, test
 
