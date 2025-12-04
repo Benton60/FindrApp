@@ -6,8 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:windowSoftInputMode="adjustResize">>
+    tools:context=".MainActivity">
 
     <!-- Top Bar with Profile and Settings -->
     <LinearLayout
