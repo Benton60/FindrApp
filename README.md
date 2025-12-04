@@ -49,3 +49,11 @@ Map Fragment - this currently only displays the locations of the users friends. 
 Video Fragment - is currently unused i might get rid of it. it was originally supposed to be a video feed but i might change my mind.
 
 
+### Testing Accounts
+
+You obviously will need to make your own for your own database
+
+1)user, password
+2)user2, password
+
+

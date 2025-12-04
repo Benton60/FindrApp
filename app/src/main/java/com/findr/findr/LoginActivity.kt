@@ -1,5 +1,6 @@
 package com.findr.findr
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -47,6 +48,8 @@ class LoginActivity : AppCompatActivity() {
                     } catch (e: IOException) {
                         e.printStackTrace()
                     }
+                    //this says hey he managed to sign in not just use the back arrows
+                    setResult(Activity.RESULT_OK)
                     finish()
                 }catch(e: SocketTimeoutException){
                     //TODO -- make this show a no internet activity

@@ -1,6 +1,7 @@
 package com.findr.findr
 
 import android.Manifest
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -34,6 +35,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var retrofitClient: ApiService
 
+    //this is for activities that require the home fragment to be reloaded when they return to the MainActivity Fragment
+    private val restartHomeFragmentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            replaceFragment(HomeFragment(retrofitClient))   // Only refresh after login
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -45,14 +53,19 @@ class MainActivity : AppCompatActivity() {
         }
         atStart()
 
+
+        replaceFragment(HomeFragment(retrofitClient))
+
+
         //this allows the user to click the profile icon
         findViewById<TextView>(R.id.profileLink).setOnClickListener{
-            startActivity(Intent(this, LoginActivity::class.java))
+            restartHomeFragmentLauncher.launch(Intent(this, LoginActivity::class.java))
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+
+    override fun onStart(){
+        super.onStart()
         atStart()
     }
 
@@ -83,7 +96,8 @@ class MainActivity : AppCompatActivity() {
             Log.d("File Not Found", "File not found")
             Log.e("Reading Credentials", e.toString())
             val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+            //launch with the launcher so that the Fragment is reloaded when they return to this activity
+            restartHomeFragmentLauncher.launch(intent)
         }
     }
 
@@ -133,7 +147,10 @@ class MainActivity : AppCompatActivity() {
     private fun replaceFragment(fragment: Fragment) {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.fragmentContainer, fragment)
-        fragmentTransaction.addToBackStack(null) // Optional: Add to back stack for navigation
+        // Optional: Add to back stack for navigation
+        if(fragment !is HomeFragment){
+            fragmentTransaction.addToBackStack(null)
+        }
         fragmentTransaction.commit()
     }
 
