@@ -10,7 +10,6 @@ import androidx.core.view.WindowInsetsCompat
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
-import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -57,6 +56,10 @@ class MainActivity : AppCompatActivity() {
 
         replaceFragment(HomeFragment(retrofitClient))
 
+        // Add listener for fragment changes
+        supportFragmentManager.addOnBackStackChangedListener {
+            onFragmentChanged()
+        }
 
         //this allows the user to click the profile icon
         findViewById<TextView>(R.id.profileLink).setOnClickListener{
@@ -175,13 +178,27 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    fun hasPermissions(): Boolean {
+    private fun hasPermissions(): Boolean {
         return requiredPermissions.all {
             ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
-    fun requestPermissions() {
+    private fun requestPermissions() {
         requestPermissionsLauncher.launch(requiredPermissions)
     }
+
+    private fun onFragmentChanged() {
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+
+        when (currentFragment) {
+            is HomeFragment -> bottomNavigationView.menu.findItem(R.id.home).isChecked = true
+            is CameraFragment -> bottomNavigationView.menu.findItem(R.id.camera).isChecked = true
+            is MapFragment -> bottomNavigationView.menu.findItem(R.id.map).isChecked = true
+            is VideoFragment -> bottomNavigationView.menu.findItem(R.id.videos).isChecked = true
+        }
+    }
+
 }
