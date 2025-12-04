@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
+import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts

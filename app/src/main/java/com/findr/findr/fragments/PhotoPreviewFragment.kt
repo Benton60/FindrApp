@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.fragment.app.Fragment
@@ -68,7 +69,9 @@ class PhotoPreviewFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_photo_preview, container, false)
         imageView = view.findViewById(R.id.photoImageView)
         uploadButton = view.findViewById(R.id.uploadButton)
+        val saveButton = view.findViewById<Button>(R.id.saveButton)
 
+        //setting the photo
         photoPath?.let {
             val bitmap = getRotatedBitmap(it)
             imageView.setImageBitmap(bitmap)
@@ -76,6 +79,8 @@ class PhotoPreviewFragment : Fragment() {
             Toast.makeText(requireContext(), "Image not found", Toast.LENGTH_SHORT).show()
         }
 
+
+        //setting up buttons
         uploadButton.setOnClickListener {
 
             //all api work must be done within coroutines
@@ -90,9 +95,6 @@ class PhotoPreviewFragment : Fragment() {
                 uploadPostWithImage()
             }
         }
-
-
-        val saveButton = view.findViewById<Button>(R.id.saveButton)
         saveButton.setOnClickListener {
             photoPath?.let {
                 saveToCameraRoll(it)
@@ -102,7 +104,7 @@ class PhotoPreviewFragment : Fragment() {
         return view
     }
 
-    //the sole purpose of ovveriding the ondestory function is to call deletetempimage
+    //the sole purpose of over riding the onDestroy function is to call deleteTempImage
     override fun onDestroyView() {
         super.onDestroyView()
         deleteTempImage()
