@@ -42,9 +42,11 @@
 
         <activity
             android:name=".CreateAccountActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="false"
             android:label="@string/title_activity_create_account"
             android:theme="@style/Theme.Findr" />
+
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
