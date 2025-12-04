@@ -160,11 +160,12 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                         val postView = LayoutInflater.from(context)
                             .inflate(R.layout.item_post, postsContainer, false)
 
-                        postView.findViewById<TextView>(R.id.postAuthor).text =
-                            post.description
+                        //author needs an onClickListener later so it gets a val
+                        val author = postView.findViewById<TextView>(R.id.postAuthor)
+                        author.text = post.author
 
                         postView.findViewById<TextView>(R.id.postDescription).text =
-                            post.author
+                            post.description
 
                         val postImageView = postView.findViewById<ImageView>(R.id.postImage)
 
@@ -242,6 +243,23 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                         }
 
 
+
+                        //I put the onClickListener for the authors name last because i want as much time as possible
+                        //for the other stuff to load to help prevent memory leaks. it shouldn't leak memory anyways but
+                        //just in case
+                        withContext(Dispatchers.Main) {
+                            author.setOnClickListener {
+                                val clickedUsername = author.text
+                                val fragment = ProfileViewerFragment.newInstance(
+                                    clickedUsername.toString(),
+                                    retrofitClient
+                                )
+                                parentFragmentManager.beginTransaction()
+                                    .replace(R.id.fragmentContainer, fragment)
+                                    .addToBackStack(null)
+                                    .commit()
+                            }
+                        }
                     } catch (e: Exception) {
                         Log.e("PostPic",
                             "Failed to download or decode post picture for ${post.photoPath}",

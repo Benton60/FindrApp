@@ -13,7 +13,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "http://10.33.0.116:8080/api/";
+    //Home API ip: 192.168.1.167
+    //University API ip: 10.33.0.116
+    private static final String BASE_URL = "http://192.168.1.167:8080/api/";
     private static Retrofit retrofit;
     private static String currentUsername;
     private static String currentPassword;

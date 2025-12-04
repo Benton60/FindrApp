@@ -9,20 +9,16 @@ import android.graphics.Matrix
 import android.graphics.drawable.GradientDrawable
 import android.media.ExifInterface
 import android.os.Bundle
-import android.provider.ContactsContract.CommonDataKinds.Im
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
@@ -34,7 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
-import org.w3c.dom.Text
 import java.io.File
 
 class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.fragment_home) {
@@ -82,11 +77,14 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                         val postView = LayoutInflater.from(context)
                             .inflate(R.layout.item_post, postsContainer, false)
 
-                        postView.findViewById<TextView>(R.id.postAuthor).text =
+                        postView.findViewById<TextView>(R.id.postDescription).text =
                             post.description
 
-                        postView.findViewById<TextView>(R.id.postDescription).text =
-                            post.author
+                        //author gets a variable assignment because it gets an onclick listener later
+                        val author = postView.findViewById<TextView>(R.id.postAuthor)
+                        author.text = post.author
+
+
                         val postImageView = postView.findViewById<ImageView>(R.id.postImage)
                         //this entire coroutinescope is dedicated to orienting the picture correctly
                         withContext(Dispatchers.Main) {
@@ -163,6 +161,23 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                         }
 
 
+                        //I put the onClickListener for the authors name last because i want as much time as possible
+                        //for the other stuff to load to help prevent memory leaks. it shouldn't leak memory anyways but
+                        //just in case
+                        withContext(Dispatchers.Main) {
+                            author.setOnClickListener {
+                                val clickedUsername = author.text
+                                val fragment = ProfileViewerFragment.newInstance(
+                                    clickedUsername.toString(),
+                                    retrofitClient
+                                )
+                                parentFragmentManager.beginTransaction()
+                                    .replace(R.id.fragmentContainer, fragment)
+                                    .addToBackStack(null)
+                                    .commit()
+                            }
+                        }
+
                     } catch (e: Exception) {
                         Log.e("PostPic",
                             "Failed to download or decode post picture for ${post.photoPath}",
@@ -218,6 +233,8 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                             Log.w("ProfilePic", "No profile picture found for ${friend.username}, using default")
                         }
 
+
+                        //this launches the profile_viewer fragment when the user is clicked
                         friendView.setOnClickListener {
                             val clickedUsername = friend.username
                             val fragment = ProfileViewerFragment.newInstance(clickedUsername, retrofitClient)
