@@ -49,6 +49,8 @@ interface ApiService {
     suspend fun getPostsByAuthor(@Path("author") author: String): List<Post>
     @GET("posts/byLocation/{longitude}/{latitude}")
     suspend fun getPostsByLocation(@Path("longitude") longitude: Double, @Path("latitude") latitude: Double): List<Post>
+    @GET("posts/byPage/{id}/{longitude}/{latitude}")
+    suspend fun getPostsByPage(@Path("id") id: Int, @Path("longitude") longitude: Double, @Path("latitude") latitude: Double): List<Post>
 
     //Friends
     @GET("friendships/friends/{username}")
