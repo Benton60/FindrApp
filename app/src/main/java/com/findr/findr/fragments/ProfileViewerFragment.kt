@@ -92,7 +92,15 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
         val adapter = PostsAdapter(
             api = retrofitClient,
             rotateFn = { file -> rotateBitmapByExif(file, BitmapFactory.decodeFile(file.absolutePath)) },
-            loadMoreCallback = { viewModel.loadMore() }
+            loadMoreCallback = { viewModel.loadMore() },
+            onAuthorClick = { username ->
+                //okay so normally this would open a ProfileViewerFragment but
+                //in this case the posts possibly displayed are already this Profiles posts
+                //so clicking on the author would only open a new instance of ProfileViewerFragment
+                //of the exact same Profile. which just builds up on the stack and ram usage.
+                //so for the ProfileViewerFragment implementation only the onAuthorClick does nothing
+            }
+
         )
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter

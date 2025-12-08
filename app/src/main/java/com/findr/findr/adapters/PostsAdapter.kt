@@ -21,7 +21,8 @@ import java.io.File
 class PostsAdapter(
     private val api: ApiService,
     private val rotateFn: (File) -> android.graphics.Bitmap,   // rotated bitmap helper
-    private val loadMoreCallback: () -> Unit
+    private val loadMoreCallback: () -> Unit,
+    private val onAuthorClick: (String) -> Unit    // Pass the username to the callback
 ) : ListAdapter<Post, PostsAdapter.PostViewHolder>(DiffCallback) {
 
     object DiffCallback : DiffUtil.ItemCallback<Post>() {
@@ -78,6 +79,7 @@ class PostsAdapter(
             }
         }
 
+
         holder.heart.setOnClickListener { btn ->
             val liked = btn.tag as Boolean
             val newState = !liked
@@ -91,6 +93,14 @@ class PostsAdapter(
                 if (newState) api.addLike(post.id) else api.removeLike(post.id)
             }
         }
+
+
+
+        // CLICKING ON AUTHOR HANDLING
+        holder.author.setOnClickListener{
+            onAuthorClick(post.author)
+        }
+
 
         // PAGINATION TRIGGER
         if (position == itemCount - 1) {

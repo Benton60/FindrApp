@@ -68,7 +68,21 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
         val adapter = PostsAdapter(
             api = retrofitClient,
             rotateFn = { file -> rotateBitmapByExif(file, BitmapFactory.decodeFile(file.absolutePath)) },
-            loadMoreCallback = { viewModel.loadMore() }
+            loadMoreCallback = { viewModel.loadMore() },
+            onAuthorClick = { username ->
+                // Create fragment and pass arguments
+                val fragment = ProfileViewerFragment(retrofitClient).apply {
+                    arguments = Bundle().apply {
+                        putString("username", username)
+                    }
+                }
+
+                // Launch fragment
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
         )
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
