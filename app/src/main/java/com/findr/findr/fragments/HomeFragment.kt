@@ -3,6 +3,8 @@ package com.findr.findr.fragments
 
 
 //this fragment displays the users list of friends and posts by location
+import PostsViewModel
+import androidx.fragment.app.viewModels
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -12,19 +14,25 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageButton
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
 import com.findr.findr.config.LocationConfig
-import com.findr.findr.entity.Post
 import com.findr.findr.entity.User
+import com.findr.findr.repository.PostsRepository
+import com.findr.findr.ui.PostsAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,14 +42,53 @@ import java.io.File
 
 class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.fragment_home) {
 
+
+
+    private val viewModel: PostsViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = PostsRepository(retrofitClient)
+                val locationConfig = LocationConfig(context)
+                @Suppress("UNCHECKED_CAST")
+                return PostsViewModel(repository, requireContext()) as T
+            }
+        }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        // Note: ensure fragment_home.xml uses a RecyclerView with id recyclerViewPosts
+        return inflater.inflate(R.layout.fragment_home, container, false)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Setup RecyclerView for Posts
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewPosts)
+        val adapter = PostsAdapter(
+            api = retrofitClient,
+            rotateFn = { file -> rotateBitmapByExif(file, BitmapFactory.decodeFile(file.absolutePath)) },
+            loadMoreCallback = { viewModel.loadMore() }
+        )
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = adapter
+
+        // Observe posts flow and submit to adapter
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.posts.collect { list ->
+                adapter.submitList(list)
+            }
+        }
+
+        // Trigger initial load
+        viewModel.loadInitial()
+
+        // Still load friends as before
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                getPosts()
                 getFriends()
-            }catch(e: SecurityException){
-                CoroutineScope(Dispatchers.Main).launch{
+            } catch (e: SecurityException) {
+                withContext(Dispatchers.Main) {
                     Toast.makeText(requireContext(), "Unable to access location", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -49,148 +96,6 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
     }
 
 
-
-    //both functions work very similarly to retrieve photos/users from the api and display them.
-    private suspend fun getPosts() {
-
-        //the getPosts() function uses the "byLocation" endpoint this is the endpoint that uses a location based algorithm to determine
-        //which posts to serve the user
-
-
-        CoroutineScope(Dispatchers.IO).launch{
-            val postsContainer = view?.findViewById<LinearLayout>(R.id.postsContainer)
-
-            try {
-                val location = LocationConfig(context).roughLocation
-                val posts: List<Post> =
-                    retrofitClient.getPostsByLocation(location.longitude, location.latitude)
-
-                for (post in posts) {
-
-                    var postPic: ResponseBody?
-
-                    try {
-                        postPic = retrofitClient.downloadPostPhoto(
-                            post.photoPath.replace("\\", " ")
-                        )
-                        // Inflate post view
-                        val postView = LayoutInflater.from(context)
-                            .inflate(R.layout.item_post, postsContainer, false)
-
-                        postView.findViewById<TextView>(R.id.postDescription).text =
-                            post.description
-
-                        //author gets a variable assignment because it gets an onclick listener later
-                        val author = postView.findViewById<TextView>(R.id.postAuthor)
-                        author.text = post.author
-
-
-                        val postImageView = postView.findViewById<ImageView>(R.id.postImage)
-                        //this entire coroutinescope is dedicated to orienting the picture correctly
-                        withContext(Dispatchers.Main) {
-                            if (postPic != null) {
-
-                                // -------------------------------
-                                // STEP 1: Save image to temp file
-                                // -------------------------------
-                                val tempFile = File.createTempFile("post_", ".jpg", context?.cacheDir)
-                                tempFile.outputStream().use { out ->
-                                    out.write(postPic.bytes())
-                                }
-
-                                // -------------------------------
-                                // STEP 2: Decode bitmap
-                                // -------------------------------
-                                val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
-
-                                if (bitmap != null) {
-
-                                    // -------------------------------
-                                    // STEP 3: Rotate based on EXIF
-                                    // -------------------------------
-                                    val correctedBitmap =
-                                        rotateBitmapByExif(tempFile, bitmap)
-
-                                    postImageView.setImageBitmap(correctedBitmap)
-
-                                } else {
-                                    Log.e("PostPic", "Failed to decode bitmap for ${post.id}")
-                                }
-                            }
-
-                            postsContainer?.addView(postView)
-                        }
-
-
-
-                        //this is to check whether the post has been like previously and set the icon_background accordingly
-                        //this is wrapped in a coroutinescope to separate it from the rest of the post loading runtime. likes should be checked concurrently not linearly
-                        //to help with perceived latency
-                        val postHeart = postView.findViewById<ImageButton>(R.id.postHeart)
-
-                        val isLiked = withContext(Dispatchers.IO) { retrofitClient.checkLike(post.id) }
-
-                        //set background
-                        withContext(Dispatchers.Main) {
-                            if (isLiked) {
-                                postHeart.setBackgroundResource(R.drawable.ic_heart_filled)
-                            } else {
-                                postHeart.setBackgroundResource(R.drawable.ic_heart)
-                            }
-                        }
-                        postHeart.tag = isLiked
-
-                        postHeart.setOnClickListener { btn ->
-                            val liked = btn.tag as Boolean
-                            btn.tag = !liked // toggle
-
-                            if (!liked) {
-                                postHeart.setBackgroundResource(R.drawable.ic_heart_filled)
-                            } else {
-                                postHeart.setBackgroundResource(R.drawable.ic_heart)
-                            }
-
-                            // Fire-and-forget network request
-                            CoroutineScope(Dispatchers.IO).launch {
-                                if (!liked) {
-                                    retrofitClient.addLike(post.id)
-                                } else {
-                                    retrofitClient.removeLike(post.id)
-                                }
-                            }
-                        }
-
-
-                        //I put the onClickListener for the authors name last because i want as much time as possible
-                        //for the other stuff to load to help prevent memory leaks. it shouldn't leak memory anyways but
-                        //just in case
-                        withContext(Dispatchers.Main) {
-                            author.setOnClickListener {
-                                val clickedUsername = author.text
-                                val fragment = ProfileViewerFragment.newInstance(
-                                    clickedUsername.toString(),
-                                    retrofitClient
-                                )
-                                parentFragmentManager.beginTransaction()
-                                    .replace(R.id.fragmentContainer, fragment)
-                                    .addToBackStack(null)
-                                    .commit()
-                            }
-                        }
-
-                    } catch (e: Exception) {
-                        Log.e("PostPic",
-                            "Failed to download or decode post picture for ${post.photoPath}",
-                            e
-                        )
-                    }
-                }
-
-            } catch (e: Exception) {
-                Log.e("Posts", "Failed to load posts", e)
-            }
-        }
-    }
     private suspend fun getFriends(){
         CoroutineScope(Dispatchers.IO).launch {
             val friendsContainer = view?.findViewById<LinearLayout>(R.id.friendsContainer)
@@ -253,9 +158,6 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
             }
         }
     }
-
-
-
 
     //helper functions
 

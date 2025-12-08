@@ -76,6 +76,10 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
+    //viewModels
+    implementation("androidx.fragment:fragment-ktx:1.8.2")
+
+
     // Retrofit + Logging
     implementation(libs.retrofit)
     implementation(libs.converter.gson)

@@ -26,24 +26,18 @@
             android:orientation="horizontal" />
     </HorizontalScrollView>
 
-    <!-- Vertical ScrollView for Posts -->
-    <ScrollView
-        android:id="@+id/scrollViewPosts"
+
+    <!-- 🚀 RecyclerView replaces vertical ScrollView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewPosts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:padding="4dp"
+        android:clipToPadding="false"
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/horizontalScrollViewFriends"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:id="@+id/postsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="4dp" />
-    </ScrollView>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
