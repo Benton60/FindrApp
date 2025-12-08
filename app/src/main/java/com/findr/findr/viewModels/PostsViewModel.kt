@@ -23,10 +23,19 @@ class PostsViewModel(
 
     private var lat: Double? = null
     private var lon: Double? = null
+    private var currentUsername: String? = null // If set, load posts for this user
 
-    fun loadInitial() {
-        if (_posts.value.isEmpty()) {
-            // Run location fetch on IO thread
+    /** Load initial posts for feed or user profile */
+    fun loadInitial(username: String? = null) {
+        page = 0
+        _posts.value = emptyList()
+        currentUsername = username
+
+        if (username != null) {
+            // Load user-specific posts
+            loadMore()
+        } else {
+            // Load feed by location
             viewModelScope.launch {
                 val location = withContext(Dispatchers.IO) {
                     LocationConfig(context).getRoughLocation() // runs off main thread
@@ -34,23 +43,31 @@ class PostsViewModel(
                 lat = location.latitude
                 lon = location.longitude
 
-                // Now load the first page
                 loadMore()
             }
         }
     }
 
+    /** Load next page of posts (for feed) or all posts (for user profile) */
     fun loadMore() {
         if (isLoading) return
-        if (lat == null || lon == null) return // wait for location
 
         isLoading = true
         viewModelScope.launch {
             try {
-                val newPosts = repository.getPosts(page, lat!!, lon!!)
+                val newPosts = when {
+                    currentUsername != null -> {
+                        repository.getPostsByUser(page, currentUsername!!)
+                    }
+                    lat != null && lon != null -> {
+                        repository.getPosts(page, lat!!, lon!!)
+                    }
+                    else -> emptyList()
+                }
+
                 if (newPosts.isNotEmpty()) {
                     _posts.value = _posts.value + newPosts
-                    page++ // increment page only if posts returned
+                    page++ // increment page only for feed
                 }
             } finally {
                 isLoading = false

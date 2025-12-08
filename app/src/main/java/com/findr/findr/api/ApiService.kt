@@ -45,8 +45,8 @@ interface ApiService {
                             @Part("longitude") longitude: RequestBody,
                             @Part("latitude") latitude: RequestBody
     ): Call<Post>
-    @GET("posts/byAuthor/{author}")
-    suspend fun getPostsByAuthor(@Path("author") author: String): List<Post>
+    @GET("posts/byAuthor/{page}/{author}")
+    suspend fun getPostsByAuthor(@Path("page") page: Int, @Path("author") author: String): List<Post>
     @GET("posts/byLocation/{longitude}/{latitude}")
     suspend fun getPostsByLocation(@Path("longitude") longitude: Double, @Path("latitude") latitude: Double): List<Post>
     @GET("posts/byPage/{page}/{longitude}/{latitude}")
