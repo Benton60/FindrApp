@@ -18,6 +18,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 
+
+
+//this class is the adapter that takes the Post and the Container that it will be stored in and maps
+//each element in the container to a field in the PostViewHolder so they can be accessed by the
+//code in the PostsViewModel Class.
 class PostsAdapter(
     private val api: ApiService,
     private val rotateFn: (File) -> android.graphics.Bitmap,   // rotated bitmap helper
