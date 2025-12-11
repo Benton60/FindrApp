@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
+import com.findr.findr.api.RetrofitClient
 import com.findr.findr.config.LocationConfig
 import com.findr.findr.entity.Post
 import com.findr.findr.entity.User
@@ -128,7 +129,6 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
             }
         }
     }
-
 
 
 
@@ -245,6 +245,12 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
     //this function holds all logic relating to adding/removing friendships
     private suspend fun setupFriendButton(){
         var btnFriends = view?.findViewById<Button>(R.id.btnFriendProfileView)
+
+        //this makes so you cant friend yourself
+        if(username.toString() == RetrofitClient.getCurrentUsername().toString()){
+            btnFriends?.visibility = View.GONE
+        }
+
         if (btnFriends != null) {
             btnFriends.setOnClickListener{
                 if(btnFriends.text == "Remove Friend"){
