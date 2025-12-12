@@ -62,7 +62,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Upload As Profile"
+            android:text="Save As Profile"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/primary_blue"/>
     </LinearLayout>
