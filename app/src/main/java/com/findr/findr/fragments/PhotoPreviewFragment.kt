@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,9 +16,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.fragment.app.Fragment
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
@@ -27,12 +24,9 @@ import com.findr.findr.api.RetrofitClient
 import com.findr.findr.config.LocationConfig
 import com.findr.findr.entity.LocationData
 import com.findr.findr.entity.Post
-import com.google.android.gms.common.api.Response
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.Call
-import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -40,7 +34,6 @@ import java.io.File
 import java.io.IOException
 
 class PhotoPreviewFragment : Fragment() {
-
     companion object {
         private const val ARG_PHOTO_PATH = "photo_path"
 
@@ -70,6 +63,7 @@ class PhotoPreviewFragment : Fragment() {
         imageView = view.findViewById(R.id.photoImageView)
         uploadButton = view.findViewById(R.id.uploadButton)
         val saveButton = view.findViewById<Button>(R.id.saveButton)
+        val profilePicButton = view.findViewById<Button>(R.id.profileSaveButton)
 
         //setting the photo
         photoPath?.let {
@@ -85,14 +79,7 @@ class PhotoPreviewFragment : Fragment() {
 
             //all api work must be done within coroutines
             CoroutineScope(Dispatchers.IO).launch {
-                requireActivity().runOnUiThread {
-                    Toast.makeText(
-                        requireContext(),
-                        "Upload clicked for $photoPath",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                uploadPostWithImage()
+               uploadPostWithImage()
             }
         }
         saveButton.setOnClickListener {
@@ -100,7 +87,9 @@ class PhotoPreviewFragment : Fragment() {
                 saveToCameraRoll(it)
             }
         }
-
+        profilePicButton.setOnClickListener{
+            uploadProfilePicture()
+        }
         return view
     }
 
@@ -128,7 +117,7 @@ class PhotoPreviewFragment : Fragment() {
         }
     }
 
-    //this function is necessary becuase it wants to store the photos sideways
+    //this function is necessary because it wants to store the photos sideways
     private fun getRotatedBitmap(filePath: String): Bitmap {
         val originalBitmap = BitmapFactory.decodeFile(filePath)
 
@@ -199,9 +188,49 @@ class PhotoPreviewFragment : Fragment() {
         }
     }
 
+    private fun uploadProfilePicture(){
+        if (photoPath == null) {
+            requireActivity().runOnUiThread {
+                Toast.makeText(requireContext(), "No photo to upload", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
+
+        val file = File(photoPath!!)
+        if (!file.exists()) {
+            requireActivity().runOnUiThread {
+                Toast.makeText(requireContext(), "Photo file does not exist", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            return
+        }
+
+
+        val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(), file)
+        val imagePart = MultipartBody.Part.createFormData("image", file.name, requestFile)
+        val username = RetrofitClient.getCurrentUsername()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try{
+                val apiService = RetrofitClient.getInstanceWithoutNewAuth().create(ApiService::class.java)
+                apiService.uploadProfilePic(username, imagePart)
+            }catch (e: Exception){
+                e.printStackTrace()
+                requireActivity().runOnUiThread {
+                    Toast.makeText(
+                        requireContext(),
+                        "Upload error: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
+    }
+
 
     //this is what uploads the photo to the api when the upload button is clicked
-    //it looks insanely humongous and complicated but 50 out of the 70 some lines are error handling and checking
+    //it looks insanely humongous and complicated but 50 out of the 70 some lines are error handling
     private fun uploadPostWithImage() {
         if (photoPath == null) {
             requireActivity().runOnUiThread {
@@ -221,10 +250,9 @@ class PhotoPreviewFragment : Fragment() {
 
         val descriptionText = view?.findViewById<EditText>(R.id.descriptionEditText)?.text?.toString() ?: "DEFAULT"
 
-        // For example, get author username from somewhere (logged-in user)
+
         val authorUsername = RetrofitClient.getCurrentUsername()
 
-        // LocationData object - replace with actual location from your app
         val location = LocationConfig(requireContext()).preciseLocation
         val currentLocation = LocationData(longitude = location.longitude, latitude = location.latitude)
 
@@ -237,6 +265,7 @@ class PhotoPreviewFragment : Fragment() {
         val descriptionPart = RequestBody.create("text/plain".toMediaTypeOrNull(), descriptionText)
         val longitudePart = RequestBody.create("text/plain".toMediaTypeOrNull(), currentLocation.longitude.toString())
         val latitudePart = RequestBody.create("text/plain".toMediaTypeOrNull(), currentLocation.latitude.toString())
+
 
         val apiService = RetrofitClient.getInstanceWithoutNewAuth().create(ApiService::class.java)
         apiService.createPostWithImage(imagePart, authorPart, descriptionPart, longitudePart, latitudePart)

@@ -3,6 +3,7 @@ import android.graphics.Point
 import com.findr.findr.entity.LocationData
 import com.findr.findr.entity.Post
 import com.findr.findr.entity.User
+import com.google.android.gms.common.api.Response
 import okhttp3.MultipartBody
 import okhttp3.MultipartBody.*
 import okhttp3.RequestBody
@@ -48,6 +49,7 @@ interface ApiService {
     @GET("posts/byAuthor/{page}/{author}")
     suspend fun getPostsByAuthor(@Path("page") page: Int, @Path("author") author: String): List<Post>
     @GET("posts/byLocation/{longitude}/{latitude}")
+    //TODO -- the get By location function is deprecated and will be dropped whenever i have time to refactor
     suspend fun getPostsByLocation(@Path("longitude") longitude: Double, @Path("latitude") latitude: Double): List<Post>
     @GET("posts/byPage/{page}/{longitude}/{latitude}")
     suspend fun getPostsByPage(@Path("page") page: Int, @Path("longitude") longitude: Double, @Path("latitude") latitude: Double): List<Post>
@@ -63,10 +65,13 @@ interface ApiService {
     suspend fun checkFriendshipStatus(@Path("username") username: String): Boolean
 
     // Photos
-    @GET("files/download/profile/{userFolder}/{filename}")
-    suspend fun downloadProfilePhoto(@Path("userFolder") userFolder: String, @Path("filename") filename: String): ResponseBody
+    @GET("files/download/profile/{userFolder}")
+    suspend fun downloadProfilePhoto(@Path("userFolder") userFolder: String): ResponseBody
     @GET("files/download/post/{filePath}")
     suspend fun downloadPostPhoto(@Path("filePath") filePath: String): ResponseBody
+    @Multipart
+    @POST("files/upload/profile/{username}")
+    suspend fun uploadProfilePic(@Path("username") username: String, @Part image: MultipartBody.Part): ResponseBody
 
     //Likes
     @POST("likes/addLike/{postID}")

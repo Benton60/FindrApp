@@ -120,7 +120,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                     // Load the profile photo
                     var profilePic: ResponseBody? = null
                     try {
-                        profilePic = retrofitClient.downloadProfilePhoto(friend.username, "profile.png")
+                        profilePic = retrofitClient.downloadProfilePhoto(friend.username)
                     } catch (e: Exception) {
                         Log.e("ProfilePic", "Failed to download profile picture for ${friend.username}", e)
                     }
