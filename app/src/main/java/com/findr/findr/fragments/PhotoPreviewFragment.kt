@@ -176,11 +176,9 @@ class PhotoPreviewFragment : Fragment() {
                 }
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                contentValues.clear()
-                contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
-                resolver.update(imageUri, contentValues, null, null)
-            }
+            contentValues.clear()
+            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+            resolver.update(imageUri, contentValues, null, null)
 
             Toast.makeText(context, "Saved to Camera Roll", Toast.LENGTH_SHORT).show()
         } else {
