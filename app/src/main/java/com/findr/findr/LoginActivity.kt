@@ -18,6 +18,15 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.SocketTimeoutException
 
+
+
+//This activity is reached two separate ways.
+//  1) if the user doesn't have saved credentials they will be immediately sent here to login which creates them.
+//      in the credential check it is launched with a checker that waits until the activity is closed and if it is it relaunches the
+//      HomeFragment to redisplay the relevant posts. it is impossible to get past the credential checker as it is always the first developer defined code to run when the main activity is returned to.
+//  2) if the user is in the profileViewerFragment and it is their own profile the friend/unfriend button will turn into a switch account button
+//      if they actually switch accounts it will switch back to the home-fragment and reload the posts otherwise it will stay in the profile-viewer
+
 //TODO -- add in the forgot password functionality
 
 class LoginActivity : AppCompatActivity() {

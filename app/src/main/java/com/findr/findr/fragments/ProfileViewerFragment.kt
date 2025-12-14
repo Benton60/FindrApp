@@ -6,6 +6,8 @@ package com.findr.findr.fragments
 //find more documentation in that file as i wrote it first.
 
 import PostsViewModel
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -23,6 +25,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
@@ -30,6 +33,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.findr.findr.LoginActivity
+import com.findr.findr.MainActivity
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
@@ -46,6 +51,15 @@ import okhttp3.ResponseBody
 import java.io.File
 
 class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R.layout.fragment_profile_viewer) {
+
+    //this is used to launch the login activity when the user clicks on the button that has been set up as a switch account button
+    private val restartHomeFragmentLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                (requireActivity() as MainActivity)
+                    .replaceFragment(HomeFragment(retrofitClient))
+            }
+        }
 
     // Key for arguments
     companion object {
@@ -248,32 +262,39 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
 
         //this makes so you cant friend yourself
         if(username.toString() == RetrofitClient.getCurrentUsername().toString()){
-            btnFriends?.visibility = View.GONE
-        }
+            btnFriends?.text = "Change Account"
+            btnFriends?.setOnClickListener {
+                restartHomeFragmentLauncher.launch(Intent(requireContext(), LoginActivity::class.java))
+            }
 
-        if (btnFriends != null) {
-            btnFriends.setOnClickListener{
-                if(btnFriends.text == "Remove Friend"){
-                    CoroutineScope(Dispatchers.IO).launch {
-                        retrofitClient.removeFriend(username.toString())
+
+        //this is a little jencky but the idea is that if it is your own profile the button becomes a switch account button rather
+        //than a friend/unfriend button. the else statement is for when it isn't your profile
+        }else {
+            if (btnFriends != null) {
+                btnFriends.setOnClickListener {
+                    if (btnFriends.text == "Remove Friend") {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            retrofitClient.removeFriend(username.toString())
+                        }
+                        btnFriends?.text = "Add Friend"
+                    } else if (btnFriends.text == "Add Friend") {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            retrofitClient.addFriend(username.toString())
+                        }
+                        btnFriends?.text = "Remove Friend"
                     }
-                    btnFriends?.text = "Add Friend"
-                }else if(btnFriends.text == "Add Friend"){
-                    CoroutineScope(Dispatchers.IO).launch {
-                        retrofitClient.addFriend(username.toString())
-                    }
-                    btnFriends?.text = "Remove Friend"
                 }
             }
-        }
-        CoroutineScope(Dispatchers.IO).launch {
-            if(retrofitClient.checkFriendshipStatus(username.toString())){
-                withContext(Dispatchers.Main) {
-                    btnFriends?.text = "Remove Friend"
-                }
-            }else{
-                withContext(Dispatchers.Main) {
-                    btnFriends?.text = "Add Friend"
+            CoroutineScope(Dispatchers.IO).launch {
+                if (retrofitClient.checkFriendshipStatus(username.toString())) {
+                    withContext(Dispatchers.Main) {
+                        btnFriends?.text = "Remove Friend"
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        btnFriends?.text = "Add Friend"
+                    }
                 }
             }
         }

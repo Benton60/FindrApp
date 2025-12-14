@@ -9,6 +9,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.provider.Settings.Global.putString
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
@@ -21,6 +22,7 @@ import com.findr.findr.config.LocationConfig
 import com.findr.findr.fragments.CameraFragment
 import com.findr.findr.fragments.HomeFragment
 import com.findr.findr.fragments.MapFragment
+import com.findr.findr.fragments.ProfileViewerFragment
 import com.findr.findr.fragments.VideoFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
@@ -54,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         atStart()
 
 
+        //this runs when the app is first opened to initialize the first fragment
         replaceFragment(HomeFragment(retrofitClient))
 
         // Add listener for fragment changes
@@ -62,8 +65,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         //this allows the user to click the profile icon
+        //it starts the profileViewer fragment to view your own profile
         findViewById<TextView>(R.id.profileLink).setOnClickListener{
-            restartHomeFragmentLauncher.launch(Intent(this, LoginActivity::class.java))
+            replaceFragment(ProfileViewerFragment(retrofitClient).apply {
+                arguments = Bundle().apply{
+                    putString("username", RetrofitClient.getCurrentUsername())
+                }
+            });
         }
     }
 
@@ -97,6 +105,7 @@ class MainActivity : AppCompatActivity() {
                 //TODO -- switch to a no internet connectivity activity
             }
         }catch(e: Exception){
+            //this is when they don't have credentials saved so they are sent to the login activity
             Log.d("File Not Found", "File not found")
             Log.e("Reading Credentials", e.toString())
             val intent = Intent(this, LoginActivity::class.java)
@@ -148,7 +157,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun replaceFragment(fragment: Fragment) {
+    fun replaceFragment(fragment: Fragment) {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.fragmentContainer, fragment)
         // Optional: Add to back stack for navigation
