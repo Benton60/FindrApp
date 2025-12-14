@@ -109,6 +109,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
     implementation("androidx.camera:camera-camera2:1.4.1")
+    implementation(libs.androidx.exifinterface)
 
     // Tests
     testImplementation(libs.junit)

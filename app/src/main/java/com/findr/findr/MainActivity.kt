@@ -9,7 +9,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.provider.Settings.Global.putString
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
@@ -71,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                 arguments = Bundle().apply{
                     putString("username", RetrofitClient.getCurrentUsername())
                 }
-            });
+            })
         }
     }
 

@@ -12,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.drawable.GradientDrawable
-import android.media.ExifInterface
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -20,13 +19,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat.getColor
+import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -39,7 +38,6 @@ import com.findr.findr.R
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
 import com.findr.findr.config.LocationConfig
-import com.findr.findr.entity.Post
 import com.findr.findr.entity.User
 import com.findr.findr.repository.PostsRepository
 import com.findr.findr.ui.PostsAdapter
@@ -258,7 +256,7 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
 
     //this function holds all logic relating to adding/removing friendships
     private suspend fun setupFriendButton(){
-        var btnFriends = view?.findViewById<Button>(R.id.btnFriendProfileView)
+        val btnFriends = view?.findViewById<Button>(R.id.btnFriendProfileView)
 
         //this makes so you cant friend yourself
         if(username.toString() == RetrofitClient.getCurrentUsername().toString()){
@@ -277,12 +275,12 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                         CoroutineScope(Dispatchers.IO).launch {
                             retrofitClient.removeFriend(username.toString())
                         }
-                        btnFriends?.text = "Add Friend"
+                        btnFriends.text = "Add Friend"
                     } else if (btnFriends.text == "Add Friend") {
                         CoroutineScope(Dispatchers.IO).launch {
                             retrofitClient.addFriend(username.toString())
                         }
-                        btnFriends?.text = "Remove Friend"
+                        btnFriends.text = "Remove Friend"
                     }
                 }
             }
