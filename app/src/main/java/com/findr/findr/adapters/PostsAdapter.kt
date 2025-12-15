@@ -1,6 +1,5 @@
-package com.findr.findr.ui
+package com.findr.findr.adapters
 
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

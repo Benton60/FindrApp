@@ -1,14 +1,11 @@
 package com.findr.findr.api;
 
-import com.findr.findr.entity.User;
 
-import java.io.IOException;
 
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -27,15 +24,12 @@ public class RetrofitClient {
             currentPassword = password;
 
             // Create an Interceptor to add the Basic Authentication header
-            Interceptor authInterceptor = new Interceptor() {
-                @Override
-                public Response intercept(Chain chain) throws IOException {
-                    Request originalRequest = chain.request();
-                    Request.Builder builder = originalRequest.newBuilder()
-                            .header("Authorization", Credentials.basic(username, password));
-                    Request authenticatedRequest = builder.build();
-                    return chain.proceed(authenticatedRequest);
-                }
+            Interceptor authInterceptor = interceptor -> {
+                Request originalRequest = interceptor.request();
+                Request.Builder builder = originalRequest.newBuilder()
+                        .header("Authorization", Credentials.basic(username, password));
+                Request authenticatedRequest = builder.build();
+                return interceptor.proceed(authenticatedRequest);
             };
 
             // Build the OkHttpClient with the Interceptor
@@ -59,16 +53,16 @@ public class RetrofitClient {
         return currentUsername;
     }
     public static Retrofit getInstanceWithoutAuth() {
-            // Build the OkHttpClient with the Interceptor
-            OkHttpClient client = new OkHttpClient.Builder().build();
+        // Build the OkHttpClient with the Interceptor
+        OkHttpClient client = new OkHttpClient.Builder().build();
 
-            // Create the Retrofit instance
-            Retrofit retrofitwithoutAuth = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-        return retrofitwithoutAuth;
+
+        // Create the Retrofit instance
+        return new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
     }
 
 }
