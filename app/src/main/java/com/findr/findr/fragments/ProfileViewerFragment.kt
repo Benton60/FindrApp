@@ -39,8 +39,8 @@ import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
 import com.findr.findr.config.LocationConfig
 import com.findr.findr.entity.User
-import com.findr.findr.repository.PostsRepository
-import com.findr.findr.ui.PostsAdapter
+import com.findr.findr.repositories.PostsRepository
+import com.findr.findr.adapters.PostsAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -304,7 +304,7 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
     //camera it was taken on. I was having difficulty becuase the front camera on some phones is mirrored
     //it uses the exif portion of the metadata. It is slightly more time costly to do this but i didn't notice a difference
     //and in my opinion its necessary
-    fun rotateBitmapByExif(file: File, bitmap: Bitmap): Bitmap {
+    private fun rotateBitmapByExif(file: File, bitmap: Bitmap): Bitmap {
         val exif = ExifInterface(file.absolutePath)
         val orientation = exif.getAttributeInt(
             ExifInterface.TAG_ORIENTATION,

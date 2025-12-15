@@ -1,4 +1,4 @@
-package com.findr.findr.repository
+package com.findr.findr.repositories
 
 import com.findr.findr.api.ApiService
 import com.findr.findr.entity.Post

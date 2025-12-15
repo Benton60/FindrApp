@@ -1,7 +1,6 @@
 package com.findr.findr.entity;
 
-import android.graphics.Point;
-import android.location.Location;
+
 
 public class Post {
     private Long id;

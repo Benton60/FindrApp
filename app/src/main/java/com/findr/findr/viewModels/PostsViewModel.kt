@@ -3,7 +3,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.findr.findr.config.LocationConfig
 import com.findr.findr.entity.Post
-import com.findr.findr.repository.PostsRepository
+import com.findr.findr.repositories.PostsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

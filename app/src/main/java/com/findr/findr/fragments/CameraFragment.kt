@@ -4,9 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.BitmapFactory.*
 import android.graphics.Matrix
-import android.media.ExifInterface
+import androidx.exifinterface.media.ExifInterface
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -18,7 +17,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.camera2.Camera2Config
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -34,7 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileOutputStream
 import kotlin.math.max
-import android.graphics.BitmapFactory.decodeFile as decodeFile1
 
 class CameraFragment : Fragment() {
 
@@ -217,7 +214,7 @@ class CameraFragment : Fragment() {
         return@withContext outFile
     }
 
-    fun decodeDownscaledBitmap(file: File, maxSize: Int): Bitmap {
+    private fun decodeDownscaledBitmap(file: File, maxSize: Int): Bitmap {
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
         BitmapFactory.decodeFile(file.absolutePath, options)

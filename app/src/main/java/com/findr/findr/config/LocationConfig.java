@@ -3,7 +3,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.location.Location;
 
 import androidx.core.content.ContextCompat;

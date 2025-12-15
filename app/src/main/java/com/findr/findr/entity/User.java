@@ -1,10 +1,7 @@
 package com.findr.findr.entity;
 
 
-import android.graphics.Point;
-import android.location.Location;
-
-import java.util.List;
+import androidx.annotation.NonNull;
 
 public class User {
     private Long id;
@@ -67,6 +64,7 @@ public class User {
         this.location = location;
     }
 
+    @NonNull
     @Override
     public String toString(){
         return "Name: " + username +

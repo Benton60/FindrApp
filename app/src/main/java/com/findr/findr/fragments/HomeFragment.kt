@@ -31,8 +31,8 @@ import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
 import com.findr.findr.config.LocationConfig
 import com.findr.findr.entity.User
-import com.findr.findr.repository.PostsRepository
-import com.findr.findr.ui.PostsAdapter
+import com.findr.findr.repositories.PostsRepository
+import com.findr.findr.adapters.PostsAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
