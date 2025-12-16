@@ -15,6 +15,7 @@ import com.google.android.material.textview.MaterialTextView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.SocketTimeoutException
 
@@ -65,7 +66,7 @@ class LoginActivity : AppCompatActivity() {
                     startActivity(Intent(this@LoginActivity, InternetLessActivity::class.java))
                 }catch (e:Exception){
                     Log.e("Can't verify", e.toString())
-                    CoroutineScope(Dispatchers.Main).launch{
+                    withContext(Dispatchers.Main){
                         Toast.makeText(this@LoginActivity, "Incorrect Username or Password", Toast.LENGTH_SHORT).show()
                     }
                 }

@@ -114,8 +114,8 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                 //of the exact same Profile. which just builds up on the stack and ram usage.
                 //so for the ProfileViewerFragment implementation only the onAuthorClick does nothing
             }
-
         )
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
@@ -216,7 +216,7 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                     val friendImageView = friendView.findViewById<ImageView>(R.id.friendImage)
 
                     // Launch a coroutine for UI update
-                    CoroutineScope(Dispatchers.Main).launch {
+                    withContext(Dispatchers.Main) {
                         // If profile picture exists, decode and set it
                         if (profilePic != null) {
                             val bitmap = BitmapFactory.decodeStream(profilePic.byteStream())
