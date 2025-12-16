@@ -32,6 +32,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.findr.findr.InternetLessActivity
 import com.findr.findr.LoginActivity
 import com.findr.findr.MainActivity
 import com.findr.findr.R
@@ -248,7 +249,9 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                     }
                 }
             } catch (e: Exception) {
-                //TODO -- make it jump to the no internet activity
+                if (isAdded) {
+                    startActivity(Intent(requireContext(), InternetLessActivity::class.java))
+                }
             }
         }
     }

@@ -101,7 +101,8 @@ class MainActivity : AppCompatActivity() {
                     fileInputStream.readLine()
                 ).create(ApiService::class.java)
             }catch(e: SocketTimeoutException){
-                //TODO -- switch to a no internet connectivity activity
+                //starts the no internet activity
+                startActivity(Intent(this, InternetLessActivity()::class.java))
             }
         }catch(e: Exception){
             //this is when they don't have credentials saved so they are sent to the login activity
@@ -113,14 +114,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //TODO -- When i implement the no internet screen this function needs to switch to that screen instead of showing a toast.
     private fun updateUserLocation(){
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 retrofitClient.updateLocation(LocationConfig(this@MainActivity).roughLocation)
             }catch(e: Exception){
-                withContext(Dispatchers.Main){
-                    Toast.makeText(this@MainActivity, "Cannot Connect To The Server", Toast.LENGTH_SHORT).show()
+                withContext(Dispatchers.Main) {
+                    startActivity(Intent(this@MainActivity, InternetLessActivity()::class.java))
                 }
             }
         }

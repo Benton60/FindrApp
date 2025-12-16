@@ -4,6 +4,7 @@ package com.findr.findr.fragments
 
 //this fragment displays the users list of friends and posts by location
 import PostsViewModel
+import android.content.Intent
 import androidx.fragment.app.viewModels
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -26,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.findr.findr.InternetLessActivity
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
@@ -168,7 +170,9 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                     }
                 }
             } catch (e: Exception) {
-                //TODO -- make it jump to the no internet activity
+                if (isAdded) {
+                    startActivity(Intent(requireContext(), InternetLessActivity::class.java))
+                }
             }
         }
     }

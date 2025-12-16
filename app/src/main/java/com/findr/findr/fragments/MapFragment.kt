@@ -7,12 +7,14 @@ package com.findr.findr.fragments
 //its a fairly simple activity for now
 
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.findr.findr.InternetLessActivity
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
 import com.findr.findr.api.RetrofitClient
@@ -71,7 +73,9 @@ class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapRea
                     }
                 }
             }catch(e: SocketTimeoutException){
-                //TODO -- make this switch to a no internet activity
+                if (isAdded) {
+                    startActivity(Intent(requireContext(), InternetLessActivity::class.java))
+                }
             }
         }
     }

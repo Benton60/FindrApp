@@ -61,11 +61,8 @@ class LoginActivity : AppCompatActivity() {
                     setResult(Activity.RESULT_OK)
                     finish()
                 }catch(e: SocketTimeoutException){
-                    //TODO -- make this show a no internet activity
-                    Log.e("Can't verify", e.toString())
-                    CoroutineScope(Dispatchers.Main).launch{
-                        Toast.makeText(this@LoginActivity, "Incorrect Username or Password", Toast.LENGTH_SHORT).show()
-                    }
+
+                    startActivity(Intent(this@LoginActivity, InternetLessActivity::class.java))
                 }catch (e:Exception){
                     Log.e("Can't verify", e.toString())
                     CoroutineScope(Dispatchers.Main).launch{
