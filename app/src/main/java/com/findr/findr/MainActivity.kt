@@ -33,7 +33,7 @@ import java.net.SocketTimeoutException
 
 
 //TODO -- All the try{}catch{} blocks where they switch to the no internet activity needs to actually check whether it is an internet related error
-
+//TODO -- Go through all the coroutineScope calls to fix my dumb-ass nested launches
 
 
 class MainActivity : AppCompatActivity() {
