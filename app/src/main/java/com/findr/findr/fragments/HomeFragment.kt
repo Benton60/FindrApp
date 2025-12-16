@@ -50,7 +50,6 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val repository = PostsRepository(retrofitClient)
-                val locationConfig = LocationConfig(context)
                 @Suppress("UNCHECKED_CAST")
                 return PostsViewModel(repository, requireContext()) as T
             }
@@ -58,15 +57,15 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        // Note: ensure fragment_home.xml uses a RecyclerView with id recyclerViewPosts
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Setup RecyclerView for Posts
+        //setup RecyclerView for posts
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewPosts)
+        //define the callbacks
         val adapter = PostsAdapter(
             api = retrofitClient,
             rotateFn = { file -> rotateBitmapByExif(file, BitmapFactory.decodeFile(file.absolutePath)) },
@@ -89,17 +88,16 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
-        // Observe posts flow and submit to adapter
+        //observe posts flow and submit to adapter
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.posts.collect { list ->
                 adapter.submitList(list)
             }
         }
 
-        // Trigger initial load
+        //trigger initial load
         viewModel.loadInitial()
 
-        // Still load friends as before
         getFriends()
     }
 
@@ -132,8 +130,9 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
                     val friendImageView = friendView.findViewById<ImageView>(R.id.friendImage)
 
-                    // Launch a coroutine for UI update
-                    CoroutineScope(Dispatchers.Main).launch {
+                    // This used to be another coroutine.
+                    // Im gonna try withContext and see if it slows down the loading of posts too much
+                    withContext(Dispatchers.Main) {
                         // If profile picture exists, decode and set it
                         if (profilePic != null) {
                             val bitmap = BitmapFactory.decodeStream(profilePic.byteStream())

@@ -47,16 +47,24 @@ class CameraFragment : Fragment() {
         previewView = view.findViewById(R.id.previewView)
         val captureButton = view.findViewById<Button>(R.id.captureButton)
 
+
+        //the camera capture code needs to run on a new thread
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         captureButton.setOnClickListener { takePhoto() }
 
+
+        //this basically is a fragment wide listener that detects double-taps to switch cameras
+        //it builds the GestureDetector class then modifies it using lambda function and overrides the
+        //onDoubleTap function
         val gestureDetector = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
                 toggleCamera()
                 return true
             }
         })
+        //this captures the touches in the view aka the video feed on the ui and passes them to the gestureDetector.
+        //cuz the gesture detector has no way to access screen events by itself
         previewView.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             true
@@ -123,6 +131,7 @@ class CameraFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        //ATTENTION -- NEEDS TO CLOSE DOWN THE EXTRA THREAD!!!!!!!!!!
         cameraExecutor.shutdown()
     }
 
@@ -134,10 +143,7 @@ class CameraFragment : Fragment() {
 
         val outputOptions = ImageCapture.OutputFileOptions.Builder(rawFile).build()
 
-        imageCapture?.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(requireContext()),
-            object : ImageCapture.OnImageSavedCallback {
+        imageCapture?.takePicture(outputOptions, ContextCompat.getMainExecutor(requireContext()), object : ImageCapture.OnImageSavedCallback {
 
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
 
@@ -148,13 +154,9 @@ class CameraFragment : Fragment() {
                             rawFile
                         )
 
-                        val previewFragment =
-                            PhotoPreviewFragment.newInstance(processedFile.absolutePath)
+                        val previewFragment = PhotoPreviewFragment.newInstance(processedFile.absolutePath)
 
-                        parentFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainer, previewFragment)
-                            .addToBackStack(null)
-                            .commit()
+                        parentFragmentManager.beginTransaction().replace(R.id.fragmentContainer, previewFragment).addToBackStack(null).commit()
                     }
                 }
 
@@ -165,10 +167,7 @@ class CameraFragment : Fragment() {
         )
     }
 
-    suspend fun processPhotoUpright1080p(
-        context: Context,
-        inputFile: File
-    ): File = withContext(Dispatchers.IO) {
+    suspend fun processPhotoUpright1080p(context: Context, inputFile: File): File = withContext(Dispatchers.IO) {
 
         val exif = ExifInterface(inputFile.absolutePath)
         val orientation = exif.getAttributeInt(

@@ -67,7 +67,7 @@ class PostsAdapter(
                 // Decode → rotate → set
                 val rotatedBitmap = rotateFn(file)
 
-                CoroutineScope(Dispatchers.Main).launch {
+                withContext(Dispatchers.Main) {
                     holder.image.setImageBitmap(rotatedBitmap)
                 }
             } catch (_: Exception) { }
