@@ -11,7 +11,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -31,6 +30,11 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.SocketTimeoutException
+
+
+//TODO -- All the try{}catch{} blocks where they switch to the no internet activity needs to actually check whether it is an internet related error
+
+
 
 class MainActivity : AppCompatActivity() {
 
