@@ -15,6 +15,7 @@ import com.findr.findr.entity.Post
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 
@@ -75,7 +76,7 @@ class PostsAdapter(
         // LIKE BUTTON HANDLING
         CoroutineScope(Dispatchers.IO).launch {
             val isLiked = api.checkLike(post.id)
-            CoroutineScope(Dispatchers.Main).launch {
+            withContext(Dispatchers.Main) {
                 holder.heart.tag = isLiked
                 holder.heart.setBackgroundResource(
                     if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart

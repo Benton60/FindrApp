@@ -41,10 +41,7 @@ class CameraFragment : Fragment() {
 
     private var lensFacing = CameraSelector.LENS_FACING_BACK // Track current camera
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_camera, container, false)
 
         previewView = view.findViewById(R.id.previewView)

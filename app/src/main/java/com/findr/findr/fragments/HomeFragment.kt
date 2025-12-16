@@ -100,19 +100,11 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
         viewModel.loadInitial()
 
         // Still load friends as before
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                getFriends()
-            } catch (e: SecurityException) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Unable to access location", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        getFriends()
     }
 
 
-    private suspend fun getFriends(){
+    private fun getFriends(){
         CoroutineScope(Dispatchers.IO).launch {
             val friendsContainer = view?.findViewById<LinearLayout>(R.id.friendsContainer)
             try {

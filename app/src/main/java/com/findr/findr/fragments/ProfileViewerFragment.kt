@@ -130,17 +130,11 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
         viewModel.loadInitial(username = username)
 
         super.onViewCreated(view, savedInstanceState)
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                getFriends()
-                loadUserProfile()
-                setupFriendButton()
-            }catch(e: SecurityException){
-                CoroutineScope(Dispatchers.Main).launch{
-                    Toast.makeText(requireContext(), "Unable to access location", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+
+        getFriends()
+        loadUserProfile()
+        setupFriendButton()
+
     }
 
 
@@ -193,7 +187,7 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
             }
         }
     }
-    private suspend fun getFriends(){
+    private fun getFriends(){
         CoroutineScope(Dispatchers.IO).launch {
             val friendsContainer = view?.findViewById<LinearLayout>(R.id.friendsContainerProfileViewer)
             try {
@@ -258,7 +252,7 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
 
 
     //this function holds all logic relating to adding/removing friendships
-    private suspend fun setupFriendButton(){
+    private fun setupFriendButton(){
         val btnFriends = view?.findViewById<Button>(R.id.btnFriendProfileView)
 
         //this makes so you cant friend yourself
@@ -276,25 +270,43 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                 btnFriends.setOnClickListener {
                     if (btnFriends.text == "Remove Friend") {
                         CoroutineScope(Dispatchers.IO).launch {
-                            retrofitClient.removeFriend(username.toString())
+                            try {
+                                retrofitClient.removeFriend(username.toString())
+                            }catch (e: Exception){
+                                if (isAdded) {
+                                    startActivity(Intent(requireContext(), InternetLessActivity::class.java))
+                                }
+                            }
                         }
                         btnFriends.text = "Add Friend"
                     } else if (btnFriends.text == "Add Friend") {
                         CoroutineScope(Dispatchers.IO).launch {
-                            retrofitClient.addFriend(username.toString())
+                            try {
+                                retrofitClient.addFriend(username.toString())
+                            }catch (e:Exception){
+                                if (isAdded) {
+                                    startActivity(Intent(requireContext(), InternetLessActivity::class.java))
+                                }
+                            }
                         }
                         btnFriends.text = "Remove Friend"
                     }
                 }
             }
             CoroutineScope(Dispatchers.IO).launch {
-                if (retrofitClient.checkFriendshipStatus(username.toString())) {
-                    withContext(Dispatchers.Main) {
-                        btnFriends?.text = "Remove Friend"
+                try {
+                    if (retrofitClient.checkFriendshipStatus(username.toString())) {
+                        withContext(Dispatchers.Main) {
+                            btnFriends?.text = "Remove Friend"
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            btnFriends?.text = "Add Friend"
+                        }
                     }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        btnFriends?.text = "Add Friend"
+                } catch (e:Exception){
+                    if (isAdded) {
+                        startActivity(Intent(requireContext(), InternetLessActivity::class.java))
                     }
                 }
             }
