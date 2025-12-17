@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody
 import java.net.SocketTimeoutException
 
 class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapReadyCallback {
@@ -51,19 +52,21 @@ class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapRea
 
         CoroutineScope(Dispatchers.IO).launch{
             try {
-                val friends =
-                    retrofitClient.getFriendsByUsername(RetrofitClient.getCurrentUsername())
+                val friends = retrofitClient.getFriendsByUsername(RetrofitClient.getCurrentUsername())
                 for (friend in friends) {
                     Log.v("Friend", "Friend: " + friend.username + ", Location: " + friend.location)
+                    var profilePic: ResponseBody? = null
+                    try {
+                        profilePic = retrofitClient.downloadProfilePhoto(friend.username)
+                    } catch (e: Exception) {
+                        Log.e("ProfilePic", "Failed to download profile picture for ${friend.username}", e)
+                    }
+
                     CoroutineScope(Dispatchers.Main).launch {
                         mMap.addMarker(
-                            MarkerOptions().position(
-                                LatLng(
-                                    friend.location.latitude,
-                                    friend.location.longitude,
-                                )
-                            ).title(friend.username)
-                        )
+                            MarkerOptions()
+                                .position(LatLng(friend.location.latitude, friend.location.longitude))
+                                .title(friend.username))
                     }
                 }
             }catch(e: SocketTimeoutException){
@@ -73,5 +76,7 @@ class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapRea
             }
         }
     }
+
+
 
 }
