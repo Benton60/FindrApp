@@ -53,8 +53,8 @@ Video Fragment - is currently unused; I might get rid of it. It was originally s
 
 You obviously will need to make your own for your own database
 Also there are a lot more accounts than this. When I first began testing, I 
-didn't keep track of the accounts I made, and then I forgot their passwords
-which are conveniently encrypted 
+didn't keep track of the accounts I made, and then I forgot their passwords, which are conveniently encrypted 
+
 1)user, password
 
 2)user2, password
