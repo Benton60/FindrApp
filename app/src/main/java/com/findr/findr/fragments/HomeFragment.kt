@@ -83,7 +83,8 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                     .replace(R.id.fragmentContainer, fragment)
                     .addToBackStack(null)
                     .commit()
-            }
+            },
+            requireContext()
         )
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter

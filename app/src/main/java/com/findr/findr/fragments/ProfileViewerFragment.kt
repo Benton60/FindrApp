@@ -113,7 +113,8 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                 //so clicking on the author would only open a new instance of ProfileViewerFragment
                 //of the exact same Profile. which just builds up on the stack and ram usage.
                 //so for the ProfileViewerFragment implementation only the onAuthorClick does nothing
-            }
+            },
+            requireContext()
         )
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())

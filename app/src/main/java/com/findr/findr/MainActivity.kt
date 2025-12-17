@@ -32,19 +32,38 @@ import java.io.InputStreamReader
 import java.net.SocketTimeoutException
 
 
-//TODO -- All the try{}catch{} blocks where they switch to the no internet activity needs to actually check whether it is an internet related error
+//TODO -- All the try{}catch{} blocks where they switch to the no internet activity need to actually check whether it is an internet related error
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var retrofitClient: ApiService
-
     //this is for activities that require the home fragment to be reloaded when they return to the MainActivity Fragment
     private val restartHomeFragmentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             replaceFragment(HomeFragment(retrofitClient))   // Only refresh after login
         }
     }
+    //this array holds all the permissions needed for the application to work
+    //a.k.a. camera and location + whatever else i eventually need
+    private val requiredPermissions = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
+    //this class is what interacts with Android and actually requests the permissions
+    private val requestPermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val allGranted = permissions.all { it.value }
+        if(!allGranted){
+            //right now this closes the app if the user doesn't accept all permissions.
+            finish()
+        }else{
+            replaceFragment(HomeFragment(retrofitClient))
+        }
+    }
+
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +95,6 @@ class MainActivity : AppCompatActivity() {
             })
         }
     }
-
 
     override fun onStart(){
         super.onStart()
@@ -169,26 +187,6 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
-
-
-    //this array holds all the permissions needed for the application to work
-    //a.k.a. camera and location + whatever else i eventually need
-    private val requiredPermissions = arrayOf(
-        Manifest.permission.CAMERA,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    )
-
-    //this class is what interacts with Android and actually requests the permissions
-    private val requestPermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val allGranted = permissions.all { it.value }
-            if(!allGranted){
-                //right now this closes the app if the user doesn't accept all permissions.
-                finish()
-            }else{
-                replaceFragment(HomeFragment(retrofitClient))
-            }
-        }
-
     private fun hasPermissions(): Boolean {
         return requiredPermissions.all {
             ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
@@ -199,6 +197,7 @@ class MainActivity : AppCompatActivity() {
         requestPermissionsLauncher.launch(requiredPermissions)
     }
 
+    //this updates the little icon bar in the bottom of the screen
     private fun onFragmentChanged() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
 
@@ -211,5 +210,4 @@ class MainActivity : AppCompatActivity() {
             is VideoFragment -> bottomNavigationView.menu.findItem(R.id.videos).isChecked = true
         }
     }
-
 }

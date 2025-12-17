@@ -1,6 +1,9 @@
 package com.findr.findr.adapters
 
+import android.content.Context
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -27,7 +30,8 @@ class PostsAdapter(
     private val api: ApiService,
     private val rotateFn: (File) -> android.graphics.Bitmap,   // rotated bitmap helper
     private val loadMoreCallback: () -> Unit,
-    private val onAuthorClick: (String) -> Unit    // Pass the username to the callback
+    private val onAuthorClick: (String) -> Unit,    // Pass the username to the callback
+    private val context: Context
 ) : ListAdapter<Post, PostsAdapter.PostViewHolder>(DiffCallback) {
 
     object DiffCallback : DiffUtil.ItemCallback<Post>() {
@@ -74,6 +78,7 @@ class PostsAdapter(
         }
 
         // LIKE BUTTON HANDLING
+        //checks for like when the post is loaded
         CoroutineScope(Dispatchers.IO).launch {
             val isLiked = api.checkLike(post.id)
             withContext(Dispatchers.Main) {
@@ -83,33 +88,49 @@ class PostsAdapter(
                 )
             }
         }
-
-
+        //adds the like listener
         holder.heart.setOnClickListener { btn ->
-            val liked = btn.tag as Boolean
-            val newState = !liked
-            btn.tag = newState
-
-            btn.setBackgroundResource(
-                if (newState) R.drawable.ic_heart_filled else R.drawable.ic_heart
-            )
-
-            CoroutineScope(Dispatchers.IO).launch {
-                if (newState) api.addLike(post.id) else api.removeLike(post.id)
-            }
+            changeLike(btn, post)
         }
 
 
+        // DOUBLE TAP TO LIKE HANDLING
+        val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener(){
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                changeLike(holder.heart, post)
+                return true
+            }
+        })
+
+        holder.image.setOnTouchListener{_, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
 
         // CLICKING ON AUTHOR HANDLING
         holder.author.setOnClickListener{
-            onAuthorClick(post.author)
+            onAuthorClick(post.author) //on author click is a callback function
         }
 
 
         // PAGINATION TRIGGER
         if (position == itemCount - 1) {
             loadMoreCallback()
+        }
+    }
+
+
+    private fun changeLike(btn: View, post: Post){
+        val liked = btn.tag as Boolean
+        val newState = !liked
+        btn.tag = newState
+
+        btn.setBackgroundResource(
+            if (newState) R.drawable.ic_heart_filled else R.drawable.ic_heart
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            if (newState) api.addLike(post.id) else api.removeLike(post.id)
         }
     }
 }
