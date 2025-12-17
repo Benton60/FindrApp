@@ -30,6 +30,25 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+        <ImageButton
+            android:layout_marginTop="8dp"
+            android:id="@+id/postHeart"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:background="@drawable/ic_heart"/>
+
+        <TextView
+            android:id="@+id/postLikeCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:paddingHorizontal="4dp"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
         <TextView
             android:id="@+id/postAuthor"
             android:layout_width="wrap_content"
@@ -59,12 +78,6 @@
             android:ellipsize="end"
             android:textStyle="bold" />
 
-        <ImageButton
-            android:layout_marginTop="8dp"
-            android:id="@+id/postHeart"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:background="@drawable/ic_heart"/>
     </LinearLayout>
 
 </LinearLayout>

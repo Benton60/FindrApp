@@ -1,10 +1,7 @@
 import android.content.Context
-import android.content.Intent
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.core.content.ContextCompat.startActivity
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.findr.findr.InternetLessActivity
 import com.findr.findr.config.LocationConfig
 import com.findr.findr.entity.Post
 import com.findr.findr.repositories.PostsRepository

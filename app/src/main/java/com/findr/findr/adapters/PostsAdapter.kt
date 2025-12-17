@@ -44,6 +44,7 @@ class PostsAdapter(
         val author: TextView = view.findViewById(R.id.postAuthor)
         val description: TextView = view.findViewById(R.id.postDescription)
         val heart: ImageButton = view.findViewById(R.id.postHeart)
+        val likeCount: TextView = view.findViewById(R.id.postLikeCounter)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -57,6 +58,7 @@ class PostsAdapter(
 
         holder.author.text = post.author
         holder.description.text = post.description
+        holder.likeCount.text = post.likes.toString()
 
         // LOAD IMAGE WITHOUT GLIDE
         CoroutineScope(Dispatchers.IO).launch {
@@ -77,6 +79,7 @@ class PostsAdapter(
             } catch (_: Exception) { }
         }
 
+
         // LIKE BUTTON HANDLING
         //checks for like when the post is loaded
         CoroutineScope(Dispatchers.IO).launch {
@@ -90,22 +93,22 @@ class PostsAdapter(
         }
         //adds the like listener
         holder.heart.setOnClickListener { btn ->
-            changeLike(btn, post)
+            changeLike(btn, holder.likeCount, post)
         }
 
 
         // DOUBLE TAP TO LIKE HANDLING
         val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener(){
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                changeLike(holder.heart, post)
+                changeLike(holder.heart, holder.likeCount, post)
                 return true
             }
         })
-
         holder.image.setOnTouchListener{_, event ->
             gestureDetector.onTouchEvent(event)
             true
         }
+
 
         // CLICKING ON AUTHOR HANDLING
         holder.author.setOnClickListener{
@@ -120,17 +123,28 @@ class PostsAdapter(
     }
 
 
-    private fun changeLike(btn: View, post: Post){
+    private fun changeLike(btn: View, likeCount: TextView, post: Post){
         val liked = btn.tag as Boolean
         val newState = !liked
         btn.tag = newState
 
-        btn.setBackgroundResource(
-            if (newState) R.drawable.ic_heart_filled else R.drawable.ic_heart
-        )
 
-        CoroutineScope(Dispatchers.IO).launch {
-            if (newState) api.addLike(post.id) else api.removeLike(post.id)
+        if(newState){
+            //background image
+            btn.setBackgroundResource(R.drawable.ic_heart_filled)
+            //api addLike call
+            CoroutineScope(Dispatchers.IO).launch { api.addLike(post.id) }
+            //update like count
+            post.likes++
+            likeCount.text = post.likes.toString()
+        }else{
+            //background image
+            btn.setBackgroundResource(R.drawable.ic_heart)
+            //api deleteLike call
+            CoroutineScope(Dispatchers.IO).launch { api.removeLike(post.id) }
+            //update like count
+            post.likes--
+            likeCount.text = post.likes.toString()
         }
     }
 }
