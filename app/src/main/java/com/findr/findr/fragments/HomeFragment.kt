@@ -22,9 +22,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.findr.findr.InternetLessActivity
@@ -90,9 +92,11 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
         recyclerView.adapter = adapter
 
         //observe posts flow and submit to adapter
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.posts.collect { list ->
-                adapter.submitList(list)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.posts.collect { list ->
+                    adapter.submitList(list)
+                }
             }
         }
 
