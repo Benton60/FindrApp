@@ -6,6 +6,7 @@
 *.iml
 .idea/
 
+local.properties
 # Keep code style and run configurations for team consistency
 !.idea/codeStyles/
 !.idea/runConfigurations/
@@ -20,3 +21,6 @@
 # Optional: APK / AAB outputs for module
 *.apk
 *.aab
+
+
+.gradle/
