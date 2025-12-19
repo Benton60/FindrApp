@@ -1,30 +1,22 @@
-# IntelliJ / Android Studio
+# ======================
+# IDE / Android Studio
+# ======================
+
+# Ignore IDE files
 *.iml
 .idea/
+
+# Keep code style and run configurations for team consistency
 !.idea/codeStyles/
 !.idea/runConfigurations/
 
-# Gradle
-.gradle/
-build/
-
-# Local configuration
-local.properties
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Android Studio
-/captures/
+# Module build folder
+/build/
 
 # Native build
 .externalNativeBuild/
 .cxx/
 
-# Logs
-*.log
-
-# Kotlin
-.kotlin/
-
+# Optional: APK / AAB outputs for module
+*.apk
+*.aab

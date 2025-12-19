@@ -1,3 +1,23 @@
-# Default ignored files
-/shelf/
-/workspace.xml
+# ======================
+# Global / Root
+# ======================
+
+# Gradle
+.gradle/
+build/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Local configuration
+local.properties
+
+# Logs
+*.log
+
+# Kotlin compiler caches
+.kotlin/
+
+# Android Studio captures (screenshots)
+captures/
