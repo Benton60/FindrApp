@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.replace
 import com.findr.findr.InternetLessActivity
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
@@ -38,6 +39,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import java.net.SocketTimeoutException
 
@@ -61,6 +63,16 @@ class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapRea
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setOnInfoWindowClickListener{ marker ->
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, ProfileViewerFragment(retrofitClient).apply {
+                    arguments = Bundle().apply {
+                        putString("username", marker.title)
+                    }
+                })
+                .addToBackStack(null)
+                .commitAllowingStateLoss()
+        }
 
         CoroutineScope(Dispatchers.IO).launch{
             try {
@@ -74,17 +86,15 @@ class MapFragment(private val retrofitClient: ApiService) : Fragment(), OnMapRea
                         Log.e("ProfilePic", "Failed to download profile picture for ${friend.username}", e)
                     }
 
-                    CoroutineScope(Dispatchers.Main).launch {
+                    withContext(Dispatchers.Main){
                         val markerView = LayoutInflater.from(requireContext()).inflate(R.layout.marker_friend, null)
-
                         val image = markerView.findViewById<ImageView>(R.id.friendImage)
 
+                        //trimming to a circle
                         profilePic?.let {
                             val circularBitmap = getCircularBitmap(responseBodyToBitmap(profilePic))
                             image.setImageBitmap(circularBitmap)
                         }
-
-
 
                         mMap.addMarker(
                             MarkerOptions()

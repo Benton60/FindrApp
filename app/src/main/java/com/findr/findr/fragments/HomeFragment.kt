@@ -84,7 +84,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                 parentFragmentManager.beginTransaction()
                     .replace(R.id.fragmentContainer, fragment)
                     .addToBackStack(null)
-                    .commit()
+                    .commitAllowingStateLoss()
             },
             requireContext()
         )
@@ -128,11 +128,6 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
 
                     friendView.findViewById<TextView>(R.id.friendName).text = friend.username
 
-                    // Change the circle around the user to green
-                    val strokeWidth = (3 * resources.displayMetrics.density).toInt() // Convert 3 pixels to 3dp
-                    val drawable = friendView.findViewById<View>(R.id.color_border).background as GradientDrawable
-                    drawable.setStroke(strokeWidth, getColor(requireContext(), R.color.green))
-
                     val friendImageView = friendView.findViewById<ImageView>(R.id.friendImage)
 
                     // This used to be another coroutine.
@@ -158,7 +153,7 @@ class HomeFragment(private val retrofitClient: ApiService) : Fragment(R.layout.f
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.fragmentContainer, fragment)
                                 .addToBackStack(null)
-                                .commit()
+                                .commitAllowingStateLoss()
                         }
 
                         friendsContainer?.addView(friendView)

@@ -209,11 +209,6 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
 
                     friendView.findViewById<TextView>(R.id.friendName).text = friend.username
 
-                    // Change the circle around the user to green
-                    val strokeWidth = (3 * resources.displayMetrics.density).toInt() // Convert 3 pixels to 3dp
-                    val drawable = friendView.findViewById<View>(R.id.color_border).background as GradientDrawable
-                    drawable.setStroke(strokeWidth, getColor(requireContext(), R.color.green))
-
                     val friendImageView = friendView.findViewById<ImageView>(R.id.friendImage)
 
                     // Launch a coroutine for UI update
@@ -230,15 +225,18 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
                             Log.w("ProfilePic", "No profile picture found for ${friend.username}, using default")
                         }
 
+
+                        //opens the ProfileViewer when the item_friend layout is clicked
                         friendView.setOnClickListener {
                             val clickedUsername = friend.username
-                            val fragment = ProfileViewerFragment.newInstance(clickedUsername, retrofitClient)
+                            val fragment = newInstance(clickedUsername, retrofitClient)
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.fragmentContainer, fragment)
                                 .addToBackStack(null)
-                                .commit()
+                                .commitAllowingStateLoss()
                         }
 
+                        //add to bar up top
                         friendsContainer?.addView(friendView)
                         Log.d("Friends", friend.username)
                     }

@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         if(fragment !is HomeFragment){
             fragmentTransaction.addToBackStack(null)
         }
-        fragmentTransaction.commit()
+        fragmentTransaction.commitAllowingStateLoss()
     }
 
     private fun hasPermissions(): Boolean {
