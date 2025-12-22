@@ -1,7 +1,6 @@
 package com.findr.findr.adapters
 
 import android.content.Context
-import android.provider.ContactsContract.CommonDataKinds.Im
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -26,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.w3c.dom.Text
 import java.io.File
 
 
@@ -56,6 +56,7 @@ class PostsAdapter(
         val addCommentContainer: LinearLayout = view.findViewById(R.id.addCommentContainer)
         val commentToAdd: EditText = view.findViewById(R.id.postAddComment)
         val commentUploadButton: ImageButton = view.findViewById(R.id.postCommentUpload)
+        val postCommentContainer: LinearLayout = view.findViewById(R.id.postCommentContainer)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -131,6 +132,7 @@ class PostsAdapter(
                 holder.addCommentContainer.visibility = View.GONE
             }else{
                 holder.addCommentContainer.visibility = View.VISIBLE
+                addTheComments(holder, post)
             }
         }
         holder.commentUploadButton.setOnClickListener {
@@ -139,7 +141,7 @@ class PostsAdapter(
                     api.createComment(Comment(holder.commentToAdd.text.trim().toString(), RetrofitClient.getCurrentUsername(), post.id))
                     withContext(Dispatchers.Main) {
                         holder.commentToAdd.setText("")
-                        holder.addCommentContainer.visibility = View.GONE
+                        addTheComments(holder, post)
                     }
                 }
 
@@ -178,6 +180,37 @@ class PostsAdapter(
             //update like count
             post.likes--
             likeCount.text = post.likes.toString()
+        }
+    }
+
+
+    private fun addTheComments(holder: PostViewHolder, post: Post){
+        holder.postCommentContainer.removeAllViews()
+        CoroutineScope(Dispatchers.IO).launch {
+            try{
+                val comments = api.getCommentsByPostID(post.id)
+                for(comment in comments){
+
+                    //setup the individual view for the comment
+                    val commentView = LayoutInflater.from(context).inflate(R.layout.item_comment, holder.postCommentContainer, false)
+                    val author = commentView.findViewById<TextView>(R.id.commentAuthor)
+                    author.text = comment.author
+                    //so the user can see the profile when they click the username
+                    author.setOnClickListener{
+                        onAuthorClick(author.text.toString())
+                    }
+                    commentView.findViewById<TextView>(R.id.commentDescription).text = comment.comment
+                    withContext(Dispatchers.Main) {
+                        holder.postCommentContainer.addView(commentView)
+                    }
+                }
+            } catch(e: Exception) {
+                e.printStackTrace()
+                //when you cant load the comments just close the comments drawer
+                withContext(Dispatchers.Main) {
+                    holder.addCommentContainer.visibility = View.GONE
+                }
+            }
         }
     }
 }

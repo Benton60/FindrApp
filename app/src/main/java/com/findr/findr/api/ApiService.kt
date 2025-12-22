@@ -89,6 +89,6 @@ interface ApiService {
     //Comments
     @POST("comments/createComment")
     suspend fun createComment(@Body comment: Comment): Comment
-    @GET("comments/byPost/{postID")
-    suspend fun getCommentsByPostID(@Path("postID") postID: Int): List<Comment>
+    @GET("comments/byPost/{postID}")
+    suspend fun getCommentsByPostID(@Path("postID") postID: Long): List<Comment>
 }

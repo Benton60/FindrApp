@@ -27,7 +27,7 @@
     </HorizontalScrollView>
 
 
-    <!-- 🚀 RecyclerView replaces vertical ScrollView -->
+    <!-- RecyclerView replaces vertical ScrollView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewPosts"
         android:layout_width="match_parent"
