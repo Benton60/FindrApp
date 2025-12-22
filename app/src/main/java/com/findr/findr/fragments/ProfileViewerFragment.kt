@@ -79,7 +79,6 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val repository = PostsRepository(retrofitClient)
                 val locationConfig = LocationConfig(context)
-                @Suppress("UNCHECKED_CAST")
                 return PostsViewModel(repository, requireContext()) as T
             }
         }
@@ -108,11 +107,22 @@ class ProfileViewerFragment(private val retrofitClient: ApiService) : Fragment(R
             rotateFn = { file -> rotateBitmapByExif(file, BitmapFactory.decodeFile(file.absolutePath)) },
             loadMoreCallback = { viewModel.loadMore() },
             onAuthorClick = { username ->
-                //okay so normally this would open a ProfileViewerFragment but
-                //in this case the posts possibly displayed are already this Profiles posts
-                //so clicking on the author would only open a new instance of ProfileViewerFragment
-                //of the exact same Profile. which just builds up on the stack and ram usage.
-                //so for the ProfileViewerFragment implementation only the onAuthorClick does nothing
+                //so basically we dont want them to reopen another profile viewer fragment of themselves so this checks if it is themself
+                //does nothing it is.
+                if(this.username != username){
+                    // Create fragment and pass arguments
+                    val fragment = ProfileViewerFragment(retrofitClient).apply {
+                        arguments = Bundle().apply {
+                            putString("username", username)
+                        }
+                    }
+
+                    // Launch fragment
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, fragment)
+                        .addToBackStack(null)
+                        .commitAllowingStateLoss()
+                }
             },
             requireContext()
         )
