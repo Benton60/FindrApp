@@ -48,19 +48,23 @@ class MainActivity : AppCompatActivity() {
     //a.k.a. camera and location + whatever else i eventually need
     private val requiredPermissions = arrayOf(
         Manifest.permission.CAMERA,
-        Manifest.permission.ACCESS_FINE_LOCATION
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
     )
     //this class is what interacts with Android and actually requests the permissions
     private val requestPermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        val allGranted = permissions.all { it.value }
-        if(!allGranted){
-            //right now this closes the app if the user doesn't accept all permissions.
-            finish()
-        }else{
-            replaceFragment(HomeFragment(retrofitClient))
-        }
-    }
 
+            val allGranted = permissions.all { it.value }
+
+            if (!allGranted) {
+                // Do NOT finish the app — just don't run permission-dependent code
+                Log.w("Permissions", "Not all permissions granted")
+                return@registerForActivityResult
+            }
+
+            // Safe to proceed now
+            atStart()
+        }
 
 
 
@@ -74,11 +78,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        atStart()
 
 
-        //this runs when the app is first opened to initialize the first fragment
-        replaceFragment(HomeFragment(retrofitClient))
 
         // Add listener for fragment changes
         supportFragmentManager.addOnBackStackChangedListener {
@@ -106,6 +107,7 @@ class MainActivity : AppCompatActivity() {
     private fun atStart() {
         if(!hasPermissions()){
             requestPermissions()
+            return
         }
         loadCredentials()
         onClickForNavBar()
@@ -121,6 +123,10 @@ class MainActivity : AppCompatActivity() {
                     fileInputStream.readLine(),
                     fileInputStream.readLine()
                 ).create(ApiService::class.java)
+
+                //only replace the home fragment after credentials have been loaded
+                replaceFragment(HomeFragment(retrofitClient))
+
             }catch(e: SocketTimeoutException){
                 //starts the no internet activity
                 startActivity(Intent(this, InternetLessActivity()::class.java))
@@ -135,13 +141,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUserLocation(){
+    private fun updateUserLocation() {
+        if (!hasPermissions() || !::retrofitClient.isInitialized) return
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                retrofitClient.updateLocation(LocationConfig(this@MainActivity).roughLocation)
-            }catch(e: Exception){
+                retrofitClient.updateLocation(
+                    LocationConfig(this@MainActivity).roughLocation
+                )
+            } catch (e: SecurityException) {
+                // Permission issue — silently ignore
+                Log.e("Location", "Location permission missing", e)
+            } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    startActivity(Intent(this@MainActivity, InternetLessActivity()::class.java))
+                    startActivity(
+                        Intent(this@MainActivity, InternetLessActivity::class.java)
+                    )
                 }
             }
         }
@@ -178,18 +193,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun replaceFragment(fragment: Fragment) {
-        val fragmentTransaction = supportFragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.fragmentContainer, fragment)
-        // Optional: Add to back stack for navigation
-        if(fragment !is HomeFragment){
-            fragmentTransaction.addToBackStack(null)
+        if (isFinishing || isDestroyed) return
+
+        supportFragmentManager.beginTransaction().apply {
+            replace(R.id.fragmentContainer, fragment)
+            if (fragment !is HomeFragment) addToBackStack(null)
+            commitAllowingStateLoss()
         }
-        fragmentTransaction.commitAllowingStateLoss()
     }
 
     private fun hasPermissions(): Boolean {
         return requiredPermissions.all {
-            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(this, it) ==
+                    PackageManager.PERMISSION_GRANTED
         }
     }
 

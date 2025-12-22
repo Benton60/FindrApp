@@ -4,7 +4,7 @@ package com.findr.findr.entity;
 
 public class Comment {
 
-    private Long id;
+    private Long id = null;
 
     private String comment;
 
@@ -14,8 +14,7 @@ public class Comment {
 
 
     public Comment(){}
-    public Comment(Long id,  String comment, String author, Long postID) {
-        this.id = id;
+    public Comment(String comment, String author, Long postID) {
         this.comment = comment;
         this.author = author;
         this.postID = postID;

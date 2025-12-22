@@ -53,7 +53,7 @@ class PostsAdapter(
         val heart: ImageButton = view.findViewById(R.id.postHeart)
         val likeCount: TextView = view.findViewById(R.id.postLikeCounter)
         val commentButton: ImageButton = view.findViewById(R.id.postCommentButton)
-        val commentContainer: LinearLayout = view.findViewById(R.id.commentContainer)
+        val addCommentContainer: LinearLayout = view.findViewById(R.id.addCommentContainer)
         val commentToAdd: EditText = view.findViewById(R.id.postAddComment)
         val commentUploadButton: ImageButton = view.findViewById(R.id.postCommentUpload)
     }
@@ -127,16 +127,20 @@ class PostsAdapter(
 
         // COMMENT BUTTON HANDLING
         holder.commentButton.setOnClickListener {
-            if(holder.commentContainer.isVisible){
-                holder.commentContainer.visibility = View.GONE
+            if(holder.addCommentContainer.isVisible){
+                holder.addCommentContainer.visibility = View.GONE
             }else{
-                holder.commentContainer.visibility = View.VISIBLE
+                holder.addCommentContainer.visibility = View.VISIBLE
             }
         }
         holder.commentUploadButton.setOnClickListener {
             if(holder.commentToAdd.text.trim().toString() != ""){
                 CoroutineScope(Dispatchers.IO).launch {
-                    api.createComment(Comment(0, holder.commentToAdd.text.trim().toString(), RetrofitClient.getCurrentUsername(), post.id))
+                    api.createComment(Comment(holder.commentToAdd.text.trim().toString(), RetrofitClient.getCurrentUsername(), post.id))
+                    withContext(Dispatchers.Main) {
+                        holder.commentToAdd.setText("")
+                        holder.addCommentContainer.visibility = View.GONE
+                    }
                 }
 
             }else{

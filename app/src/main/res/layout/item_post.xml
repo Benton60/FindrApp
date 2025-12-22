@@ -36,13 +36,6 @@
             android:layout_width="wrap_content"
             android:background="@drawable/ic_heart"/>
 
-        <ImageButton
-            android:layout_marginTop="8dp"
-            android:id="@+id/postCommentButton"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:background="@drawable/ic_comments"/>
-
         <TextView
             android:id="@+id/postLikeCounter"
             android:layout_width="wrap_content"
@@ -54,6 +47,13 @@
             android:textColor="@android:color/white"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp" />
+
+        <ImageButton
+            android:layout_marginTop="8dp"
+            android:id="@+id/postCommentButton"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:background="@drawable/ic_comments"/>
 
         <TextView
             android:id="@+id/postAuthor"
@@ -86,7 +86,7 @@
 
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/commentContainer"
+        android:id="@+id/addCommentContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
