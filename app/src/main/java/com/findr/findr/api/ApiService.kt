@@ -1,4 +1,5 @@
 package com.findr.findr.api
+import com.findr.findr.entity.Comment
 import com.findr.findr.entity.LocationData
 import com.findr.findr.entity.Post
 import com.findr.findr.entity.User
@@ -83,4 +84,11 @@ interface ApiService {
     suspend fun  removeLike(@Path("postID") postID: Long): ResponseBody
     @GET("likes/checkLike/{postID}")
     suspend fun checkLike(@Path("postID") postID: Long): Boolean
+
+
+    //Comments
+    @POST("comments/createComment")
+    suspend fun createComment(@Body comment: Comment): Comment
+    @GET("comments/byPost/{postID")
+    suspend fun getCommentsByPostID(@Path("postID") postID: Int): List<Comment>
 }

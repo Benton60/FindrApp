@@ -1,19 +1,26 @@
 package com.findr.findr.adapters
 
 import android.content.Context
+import android.provider.ContactsContract.CommonDataKinds.Im
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.findr.findr.R
 import com.findr.findr.api.ApiService
+import com.findr.findr.api.RetrofitClient
+import com.findr.findr.entity.Comment
 import com.findr.findr.entity.Post
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +52,10 @@ class PostsAdapter(
         val description: TextView = view.findViewById(R.id.postDescription)
         val heart: ImageButton = view.findViewById(R.id.postHeart)
         val likeCount: TextView = view.findViewById(R.id.postLikeCounter)
+        val commentButton: ImageButton = view.findViewById(R.id.postCommentButton)
+        val commentContainer: LinearLayout = view.findViewById(R.id.commentContainer)
+        val commentToAdd: EditText = view.findViewById(R.id.postAddComment)
+        val commentUploadButton: ImageButton = view.findViewById(R.id.postCommentUpload)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -114,11 +125,30 @@ class PostsAdapter(
             onAuthorClick(post.author) //on author click is a callback function
         }
 
+        // COMMENT BUTTON HANDLING
+        holder.commentButton.setOnClickListener {
+            if(holder.commentContainer.isVisible){
+                holder.commentContainer.visibility = View.GONE
+            }else{
+                holder.commentContainer.visibility = View.VISIBLE
+            }
+        }
+        holder.commentUploadButton.setOnClickListener {
+            if(holder.commentToAdd.text.trim().toString() != ""){
+                CoroutineScope(Dispatchers.IO).launch {
+                    api.createComment(Comment(0, holder.commentToAdd.text.trim().toString(), RetrofitClient.getCurrentUsername(), post.id))
+                }
+
+            }else{
+                Toast.makeText(context, "Invalid Comment", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // PAGINATION TRIGGER
         if (position == itemCount - 1) {
             loadMoreCallback()
         }
+
     }
 
 
