@@ -36,6 +36,13 @@
             android:layout_width="wrap_content"
             android:background="@drawable/ic_heart"/>
 
+        <ImageButton
+            android:layout_marginTop="8dp"
+            android:id="@+id/postComment"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:background="@drawable/ic_comments"/>
+
         <TextView
             android:id="@+id/postLikeCounter"
             android:layout_width="wrap_content"
