@@ -82,7 +82,7 @@
             android:paddingHorizontal="4dp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textStyle="bold" />
+            />
 
     </LinearLayout>
 
