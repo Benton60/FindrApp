@@ -74,7 +74,7 @@ class PostsAdapter(
         // LOAD IMAGE WITHOUT GLIDE
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val body = api.downloadPostPhoto(post.photoPath.replace("\\", " "))
+                val body = api.downloadPostPhoto(post.author, post.id.toString())
                 val bytes = body.bytes()
 
                 // Create temp file

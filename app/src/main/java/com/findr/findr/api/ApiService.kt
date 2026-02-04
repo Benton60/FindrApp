@@ -71,8 +71,8 @@ interface ApiService {
     // Photos
     @GET("files/download/profile/{userFolder}")
     suspend fun downloadProfilePhoto(@Path("userFolder") userFolder: String): ResponseBody
-    @GET("files/download/post/{filePath}")
-    suspend fun downloadPostPhoto(@Path("filePath") filePath: String): ResponseBody
+    @GET("files/download/post/{author}/{filePath}")
+    suspend fun downloadPostPhoto(@Path("author") author: String, @Path("filePath") filePath: String): ResponseBody
     @Multipart
     @POST("files/upload/profile/{username}")
     suspend fun uploadProfilePic(@Path("username") username: String, @Part image: MultipartBody.Part): ResponseBody

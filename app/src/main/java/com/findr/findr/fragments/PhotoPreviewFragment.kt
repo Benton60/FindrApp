@@ -76,7 +76,6 @@ class PhotoPreviewFragment : Fragment() {
 
         //setting up buttons
         uploadButton.setOnClickListener {
-
             //all api work must be done within coroutines
             CoroutineScope(Dispatchers.IO).launch {
                uploadPostWithImage()
@@ -292,6 +291,7 @@ class PhotoPreviewFragment : Fragment() {
 
                 override fun onFailure(call: retrofit2.Call<Post>, t: Throwable) {
                     requireActivity().runOnUiThread {
+                        t.message?.let { Log.e("Upload Post", it) }
                         Toast.makeText(
                             requireContext(),
                             "Upload error: ${t.message}",
