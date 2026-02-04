@@ -1,5 +1,6 @@
 package com.findr.findr.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.GestureDetector
 import android.view.LayoutInflater
@@ -64,7 +65,7 @@ class PostsAdapter(
         return PostViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PostViewHolder, @SuppressLint("RecyclerView") position: Int) {
         val post = getItem(position)
 
         holder.author.text = post.author
